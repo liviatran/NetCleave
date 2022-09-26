@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras import backend as K
@@ -21,7 +22,7 @@ def score_set(data_path, model_path, name):
     if not os.path.exists('./output/'):
         os.mkdir('./output/')
 
-    export_path = "output/{}_NetCleave.csv".format(data_path.split(".")[0])
+    export_path = "output/{}_NetCleave.csv".format(data_path.split('/')[1].split('.')[0])
     prediction_df.to_csv(export_path)
     print("Exporting predictions to: {}".format(export_path))
     return prediction_df
