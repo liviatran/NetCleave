@@ -17,8 +17,11 @@ def score_set(data_path, model_path, name):
     prediction = model.predict(encoded_df)
     prediction_df = pd.DataFrame(prediction, columns=["prediction"])
     prediction_df["sequence"] = df["sequence"]
-    
-    export_path = "{}_NetCleave.csv".format(data_path.split(".")[0])
+
+    if not os.path.exists('./output/'):
+        os.mkdir('./output/')
+
+    export_path = "output/{}_NetCleave.csv".format(data_path.split(".")[0])
     prediction_df.to_csv(export_path)
     print("Exporting predictions to: {}".format(export_path))
     return prediction_df
