@@ -87,7 +87,7 @@ def main(generate=False, train=False, score_csv=False):
     · score_csv: predict a set of cleavage sites from a csv file
     ------------------------------------------------------------
     """
-    
+
     training_data_path = 'data/training_data/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_family)
     models_export_path = 'data/models/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_family)
 
@@ -95,7 +95,7 @@ def main(generate=False, train=False, score_csv=False):
         print('Please, provide an argument. See python3 NetCleave.py -h for more information')
 
     if generate:
-        iedb_path = 'data/databases/iedb/mhc_ligand_full.csv' # download and unzip from http://www.iedb.org/database_export_v3.php
+        iedb_path = 'data/databases/iedb/mhc_ligand_full.csv' # download and unzip from http://www.iedb.org/downloader.php?file_name=doc/mhc_ligand_full_single_file.zip
         uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta' # download and decompress from https://www.uniprot.org/downloads REVIEWED fasta
         uniparc_path_headers = 'data/databases/uniparc/uniparc-yourlist_M20200416A94466D2655679D1FD8953E075198DA854EB3ES.tab'
         uniparc_path_sequence = 'data/databases/uniparc/uniparc-yourlist_M20200416A94466D2655679D1FD8953E075198DA854EB3ES.fasta'
