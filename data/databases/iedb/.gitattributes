@@ -1,0 +1,2 @@
+data/databases/iedb/mhc_ligand_full_single_file.zip filter=lfs diff=lfs merge=lfs -text
+mhc_ligand_full_single_file.zip filter=lfs diff=lfs merge=lfs -text
