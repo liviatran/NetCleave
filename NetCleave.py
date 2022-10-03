@@ -33,6 +33,11 @@ def parse_args():
                             help='Major Histocompatibility Complex allele',
                             action='store',
                             default='HLA-A')
+    parser.add_argument('--peptide_data',
+                            dest = 'peptide_data',
+                            help='Path to peptide data to use for generating data to later train the model',
+                            action='store',
+                            default='./data/databases/iedb/mhc_ligand_full.csv')
     parser.add_argument('--technique',
                             dest = 'technique',
                             help='',
@@ -49,14 +54,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def generating_data(iedb_path, uniprot_path, uniparc_path_headers, uniparc_path_sequence, conditions):
+def generating_data(peptide_path, uniprot_path, uniparc_path_headers, uniparc_path_sequence, conditions):
     """
     Generate training data that will be later used to retrain the neural network.
     Returns a dictionary with the selected peptides (key: C-terminal residue, value: peptide list)
 
     PARAMETERS
     ------------------------------------------------------------
-    · iedb_path: path to the IEDB data
+    · peptide_path: path to the peptide data (IEDB or others)
     · uniprot_path: path to the UNIPROT data
     · uniparc_path_headers: path to the UNIPARC headers data
     · uniparc_path_sequence: path to the UNIPARC sequence data
@@ -65,13 +70,16 @@ def generating_data(iedb_path, uniprot_path, uniparc_path_headers, uniparc_path_
     """
 
     # Get data from files
-    iedb_data = peptide_extractor.extract_peptide_data(iedb_path, conditions)
+    if './data/databases/iedb/' in peptide_path:
+        peptide_data = peptide_extractor.extract_peptide_data(peptide_path, conditions)
+    else:
+        peptide_data = peptide_extractor.extract_peptide_data(peptide_path, conditions, iedb=False)
     uniprot_data = uniprot_extractor.extract_uniprot_data(uniprot_path)
     uniparc_data = uniparc_extractor.extract_uniparc_data(uniparc_path_headers, uniparc_path_sequence)
     sequence_data = all_peptide_uniprot_locator.join_data(uniprot_data, uniparc_data)
 
     # Generate dictionary
-    selected_dictionary = all_peptide_uniprot_locator.locate_peptides(iedb_data, sequence_data)
+    selected_dictionary = all_peptide_uniprot_locator.locate_peptides(peptide_data, sequence_data)
 
     return selected_dictionary
 
@@ -95,19 +103,20 @@ def main(generate=False, train=False, score_csv=False):
         print('Please, provide an argument. See python3 NetCleave.py -h for more information')
 
     if generate:
-        iedb_path = 'data/databases/iedb/mhc_ligand_full.csv' # download and unzip from http://www.iedb.org/downloader.php?file_name=doc/mhc_ligand_full_single_file.zip
+        peptide_path = peptide_data
         uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta' # download and decompress from https://www.uniprot.org/downloads REVIEWED fasta
         uniparc_path_headers = 'data/databases/uniparc/uniparc-yourlist_M20200416A94466D2655679D1FD8953E075198DA854EB3ES.tab'
         uniparc_path_sequence = 'data/databases/uniparc/uniparc-yourlist_M20200416A94466D2655679D1FD8953E075198DA854EB3ES.fasta'
 
-        conditions = {'Description': None, 'Parent Protein IRI': None,
-                      'Method/Technique': ('contains', technique),
-                      'MHC allele class': ('match', mhc_class),
-                      'Allele Name': ('contains', mhc_family),
-                      #'Name': ('contains', 'Homo sapiens'),
-                      #'Parent Species': ('contains', 'Homo sapiens')
+        conditions = {
+                    'Description': None, 'Parent Protein IRI': None,
+                    # 'Method/Technique': ('contains', technique),
+                    # 'MHC allele class': ('match', mhc_class),
+                    # 'Allele Name': ('contains', mhc_family),
+                     #'Name': ('contains', 'Homo sapiens'),
+                     #'Parent Species': ('contains', 'Homo sapiens')
                      }
-        selected_dictionary = generating_data(iedb_path, uniprot_path, uniparc_path_headers, uniparc_path_sequence, conditions)
+        selected_dictionary = generating_data(peptide_path, uniprot_path, uniparc_path_headers, uniparc_path_sequence, conditions)
         all_training_data_generator.prepare_cleavage_data(selected_dictionary, training_data_path)
 
     if train:
@@ -125,6 +134,7 @@ if __name__ == '__main__':
     input_csv = arguments.input_csv
     mhc_class = arguments.mhc_class
     mhc_family = arguments.mhc_family
+    peptide_data = arguments.peptide_data
     technique = arguments.technique
     train = arguments.train
     score_csv = arguments.score_csv

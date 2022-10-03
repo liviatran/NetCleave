@@ -1,26 +1,34 @@
 import pandas as pd
 
-def extract_peptide_data(input_file_path, conditions_dictionary):
+def extract_peptide_data(input_file_path, conditions_dictionary, iedb=True):
     """ Extracts peptides in IEDB under user defined conditions
         Returns a dictionary with keys: uniprot_id, values: peptide_list
     """
-    print("Extracting peptide data from IEDB...")
-    df = generate_df(input_file_path, conditions_dictionary)
+    if iedb:
+        print("Extracting peptide data from IEDB...")
+        df = generate_df(input_file_path, conditions_dictionary)
+    else:
+        print("Extracting peptide data ...")
+        df = generate_df(input_file_path, conditions_dictionary, iedb=False)
     print("Applying filtering conditions defined by the user...")
     df_filtered = apply_conditions(df, conditions_dictionary)
     print("Creating the dictionary...")
     data = create_dictionary(df_filtered)
     return data
 
-def generate_df(input_file_path, conditions_dictionary):
+def generate_df(input_file_path, conditions_dictionary, iedb=True):
     """ Only reads columns listed in dictionary keys (condition keys)
         Gets the first sequence separated by space in peptide list. Modificated peptides are weirdly anonated: peptide + modification
         Drops rows contaning NaN in any condition column
         Resets the index of the dataframe because of removing NaNs
         Returns the dataframe
     """
-    df = pd.read_csv(input_file_path, header=1, usecols=list(conditions_dictionary.keys()))
-    df["Description"] = df["Description"].str.split().str[0]
+    if iedb:
+        df = pd.read_csv(input_file_path, header=1, usecols=list(conditions_dictionary.keys()))
+        df["Description"] = df["Description"].str.split().str[0]
+    else:
+        df = pd.read_csv(input_file_path, usecols=list(conditions_dictionary.keys()))
+        df['Parent Protein IRI'].replace(to_replace="([\w]+)", value=r'http://www.uniprot.org/uniprot/\1', regex=True,inplace=True)
     df = df.dropna()
     df = df.reset_index(drop=True)
     return df

@@ -60,10 +60,10 @@ def splitting_data(df):
 def prepare(data_train, data_val, data_test, class_labels_train, class_labels_val, class_labels_test):
     data_train, data_val, data_test = data_train.to_numpy(), data_val.to_numpy(), data_test.to_numpy()
     data_train, data_val, data_test = np.expand_dims(data_train, axis=0), np.expand_dims(data_val, axis=0), np.expand_dims(data_test, axis=0)
-    
-    data_train = np.reshape(data_train, (data_train.shape[1], 1, data_train.shape[2]))
-    data_val = np.reshape(data_val, (data_val.shape[1], 1, data_val.shape[2]))
-    data_test = np.reshape(data_test, (data_test.shape[1], 1, data_test.shape[2]))    
+
+    data_train = np.reshape(data_train, (data_train.shape[1], data_train.shape[2]))
+    data_val = np.reshape(data_val, (data_val.shape[1], data_val.shape[2]))
+    data_test = np.reshape(data_test, (data_test.shape[1], data_test.shape[2]))    
 
     class_labels_train = class_labels_train.to_numpy().reshape((-1, ))
     class_labels_val = class_labels_val.to_numpy().reshape((-1, ))
@@ -113,8 +113,8 @@ def run_NN(encoded_labeled_df, models_export_path, path):
     b_size = 64
     data_train, data_val, data_test, class_labels_train, class_labels_val, class_labels_test = splitting_data(encoded_labeled_df)
     data_train, data_val, data_test, class_labels_train, class_labels_val, class_labels_test = prepare(data_train, data_val, data_test, class_labels_train, class_labels_val, class_labels_test)
-    
-    
+
+
     neurons = len(list(encoded_labeled_df.drop(['class'], axis=1)))
     model = Sequential()
     model.add(Dense(int(neurons), input_dim=neurons, activation='tanh', kernel_initializer="glorot_normal"))
@@ -149,6 +149,6 @@ def create_models(training_data_path, model_path):
 
     encode_data = encode_sequence_data(sequence_table, df_descriptors)
     encoded_df = generate_encoded_df(encode_data, peptide_lenght, df_descriptors)
-    
+
     encoded_labeled_df = generate_encoded_labeled_df(encoded_df, class_table)
     run_NN(encoded_labeled_df, model_path, training_data_path)
