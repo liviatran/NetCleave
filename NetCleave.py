@@ -32,7 +32,7 @@ def parse_args():
                             dest = 'mhc_family',
                             help='Major Histocompatibility Complex allele',
                             action='store',
-                            default='HLA-A')
+                            default='HLA')
     parser.add_argument('--peptide_data',
                             dest = 'peptide_data',
                             help='Path to peptide data to use for generating data to later train the model',
