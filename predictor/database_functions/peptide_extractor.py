@@ -9,7 +9,7 @@ def extract_peptide_data(input_file_path, conditions_dictionary, iedb=True):
         df = generate_df(input_file_path, conditions_dictionary)
     else:
         print("Extracting peptide data ...")
-        df = generate_df(input_file_path, conditions_dictionary, iedb=False)
+        df = generate_df(input_file_path, iedb=False)
     print("Applying filtering conditions defined by the user...")
     df_filtered = apply_conditions(df, conditions_dictionary)
     print("Creating the dictionary...")
@@ -25,10 +25,11 @@ def generate_df(input_file_path, conditions_dictionary, iedb=True):
     """
     if iedb:
         df = pd.read_csv(input_file_path, header=1, usecols=list(conditions_dictionary.keys()))
-        df["Description"] = df["Description"].str.split().str[0]
+        df.rename(columns={'Description':'peptide_sequence','Parent Protein IRI':'uniprot_id'},inplace=True)
+        df["peptide_sequence"] = df["peptide_sequence"].str.split().str[0]
     else:
-        df = pd.read_csv(input_file_path, usecols=list(conditions_dictionary.keys()))
-        df['Parent Protein IRI'].replace(to_replace="([\w]+)", value=r'http://www.uniprot.org/uniprot/\1', regex=True,inplace=True)
+        df = pd.read_csv(input_file_path)
+        df['uniprot_id'].replace(to_replace="([\w]+)", value=r'http://www.uniprot.org/uniprot/\1', regex=True,inplace=True)
     df = df.dropna()
     df = df.reset_index(drop=True)
     return df
@@ -64,8 +65,8 @@ def create_dictionary(df):
         Convert the uniprot link https into uniprot code by getting last string after last "/"
         Generates a dictionary where keys are uniprot codes and values a list of non-repeated peptides for that uniprot code
     """
-    exporting_df = df[["Description", "Parent Protein IRI"]]
+    exporting_df = df[["peptide_sequence", "uniprot_id"]]
     exporting_df = exporting_df.drop_duplicates(keep="first")
-    exporting_df["Parent Protein IRI"] = exporting_df["Parent Protein IRI"].str.split("/").str[-1]
-    data = exporting_df.groupby("Parent Protein IRI")["Description"].apply(list).to_dict()
+    exporting_df["uniprot_id"] = exporting_df["uniprot_id"].str.split("/").str[-1]
+    data = exporting_df.groupby("uniprot_id")["peptide_sequence"].apply(list).to_dict()
     return data
