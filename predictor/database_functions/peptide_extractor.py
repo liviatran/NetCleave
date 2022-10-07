@@ -1,22 +1,23 @@
 import pandas as pd
 
-def extract_peptide_data(input_file_path, conditions_dictionary, iedb=True):
+def extract_peptide_data(input_file_path, conditions_dictionary=None, iedb=True):
     """ Extracts peptides in IEDB under user defined conditions
         Returns a dictionary with keys: uniprot_id, values: peptide_list
     """
     if iedb:
         print("Extracting peptide data from IEDB...")
-        df = generate_df(input_file_path, conditions_dictionary)
+        df = generate_df(input_file_path, conditions_dictionary, iedb=True)
+        print("Applying filtering conditions defined by the user...")
+        df_filtered = apply_conditions(df, conditions_dictionary)
     else:
         print("Extracting peptide data ...")
-        df = generate_df(input_file_path, iedb=False)
-    print("Applying filtering conditions defined by the user...")
-    df_filtered = apply_conditions(df, conditions_dictionary)
+        df_filtered = generate_df(input_file_path, iedb=False)
+
     print("Creating the dictionary...")
     data = create_dictionary(df_filtered)
     return data
 
-def generate_df(input_file_path, conditions_dictionary, iedb=True):
+def generate_df(input_file_path, conditions_dictionary=None, iedb=True):
     """ Only reads columns listed in dictionary keys (condition keys)
         Gets the first sequence separated by space in peptide list. Modificated peptides are weirdly anonated: peptide + modification
         Drops rows contaning NaN in any condition column
@@ -70,3 +71,7 @@ def create_dictionary(df):
     exporting_df["uniprot_id"] = exporting_df["uniprot_id"].str.split("/").str[-1]
     data = exporting_df.groupby("uniprot_id")["peptide_sequence"].apply(list).to_dict()
     return data
+
+def merge_peptide_data(dict1,dict2):
+    d = dict(dict1, **dict2)
+    return d
