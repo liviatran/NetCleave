@@ -10,7 +10,7 @@ def extract_peptide_data(input_file_path, conditions_dictionary=None, iedb=True)
         print("Applying filtering conditions defined by the user...")
         df_filtered = apply_conditions(df, conditions_dictionary)
     else:
-        print("Extracting peptide data ...")
+        print("Extracting peptide data from other databases ...")
         df_filtered = generate_df(input_file_path, iedb=False)
 
     print("Creating the dictionary...")
@@ -73,5 +73,7 @@ def create_dictionary(df):
     return data
 
 def merge_peptide_data(dict1,dict2):
+
+    print('Merging peptide data from IEDB and other databases...')
     d = dict(dict1, **dict2)
     return d

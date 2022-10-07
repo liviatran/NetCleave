@@ -55,7 +55,7 @@ def parse_args():
     parser.add_argument('--type',
                             dest = 'type',
                             help='',
-                            action='store',default='None')
+                            action='store',default=1,type=int)
     parser.add_argument('--score_csv',
                             dest = 'score_csv',
                             help='Predict a set of cleavage sites from csv',
@@ -81,15 +81,12 @@ def generating_data(uniprot_path, uniparc_path_headers, uniparc_path_sequence, t
     # Get data from files
     if type==1:
         peptide_data = peptide_extractor.extract_peptide_data(iedb_path,conditions,iedb=True)
-        print('Type1:',peptide_data)
     elif type==2:
         peptide_data1 = peptide_extractor.extract_peptide_data(iedb_path,conditions,iedb=True)
         peptide_data2 = peptide_extractor.extract_peptide_data(other_path,iedb=False)
         peptide_data = peptide_extractor.merge_peptide_data(peptide_data1,peptide_data2)
-        print('Type2:',peptide_data)
     elif type==3:
         peptide_data = peptide_extractor.extract_peptide_data(other_path,iedb=False)
-        print('Type3:',peptide_data)
 
     uniprot_data = uniprot_extractor.extract_uniprot_data(uniprot_path)
     uniparc_data = uniparc_extractor.extract_uniparc_data(uniparc_path_headers, uniparc_path_sequence)
@@ -120,12 +117,11 @@ def main(generate=False, train=False, score_csv=False):
         print('Please, provide an argument. See python3 NetCleave.py -h for more information')
 
     if generate:
-        print('Generating training data')
+        print('Generating training data, type {}...'.format(type))
         uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta' # download and decompress from https://www.uniprot.org/downloads REVIEWED fasta
         uniparc_path_headers = 'data/databases/uniparc/uniparc-yourlist_M20200416A94466D2655679D1FD8953E075198DA854EB3ES.tab'
         uniparc_path_sequence = 'data/databases/uniparc/uniparc-yourlist_M20200416A94466D2655679D1FD8953E075198DA854EB3ES.fasta'
         if type==1:
-            print('Type 1')
             peptide_path = peptide_data
             iedb_conditions = {
                                 'Description': None, 'Parent Protein IRI': None,
@@ -181,9 +177,10 @@ if __name__ == '__main__':
     mhc_class = arguments.mhc_class
     mhc_family = arguments.mhc_family
     peptide_data = arguments.peptide_data
+    peptide_data_additional = arguments.peptide_data_additional
     technique = arguments.technique
     train = arguments.train
-    type = int(arguments.type)
+    type = arguments.type
     score_csv = arguments.score_csv
 
     # Call main function
