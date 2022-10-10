@@ -24,8 +24,8 @@ def parse_args():
                             help='Path to the input csv file',
                             action='store',
                             default='input/example_file_NetCleave_score.csv')
-    parser.add_argument('--input_protein',
-                            dest = 'input_protein',
+    parser.add_argument('--input_fasta',
+                            dest = 'input_fasta',
                             help='Path to the input FASTA file',
                             action='store')
     parser.add_argument('--mhc_class',
@@ -170,7 +170,7 @@ def main(generate=False, train=False, score_csv=False):
 
     if score_csv:
         # predict_csv.score_set(input_csv, models_export_path, 'ABC')
-        outfile = cleavage_site_generator.generateCleavageSites(input_protein)
+        outfile = cleavage_site_generator.generateCleavageSites(input_fasta)
         predict_csv.score_set(outfile, models_export_path, 'ABC')
 
 
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     arguments = parse_args()
     generate = arguments.generate
     input_csv = arguments.input_csv
-    input_protein = arguments.input_protein
+    input_fasta = arguments.input_fasta
     mhc_class = arguments.mhc_class
     mhc_family = arguments.mhc_family
     peptide_data = arguments.peptide_data
