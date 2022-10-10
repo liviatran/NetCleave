@@ -1,6 +1,6 @@
 import argparse
 from predictor.database_functions import peptide_extractor, uniprot_extractor, uniparc_extractor
-from predictor.core import all_peptide_uniprot_locator, all_training_data_generator
+from predictor.core import all_peptide_uniprot_locator, all_training_data_generator, cleavage_site_generator
 from predictor.ml_main import run_NN
 from predictor.predictions import predict_csv
 
@@ -24,6 +24,10 @@ def parse_args():
                             help='Path to the input csv file',
                             action='store',
                             default='input/example_file_NetCleave_score.csv')
+    parser.add_argument('--input_protein',
+                            dest = 'input_protein',
+                            help='Path to the input FASTA file',
+                            action='store')
     parser.add_argument('--mhc_class',
                             dest = 'mhc_class',
                             help='Major Histocompatibility Complex class',
@@ -165,7 +169,9 @@ def main(generate=False, train=False, score_csv=False):
         run_NN.create_models(training_data_path, models_export_path)
 
     if score_csv:
-        predict_csv.score_set(input_csv, models_export_path, 'ABC')
+        # predict_csv.score_set(input_csv, models_export_path, 'ABC')
+        outfile = cleavage_site_generator.generateCleavageSites(input_protein)
+        predict_csv.score_set(outfile, models_export_path, 'ABC')
 
 
 if __name__ == '__main__':
@@ -174,6 +180,7 @@ if __name__ == '__main__':
     arguments = parse_args()
     generate = arguments.generate
     input_csv = arguments.input_csv
+    input_protein = arguments.input_protein
     mhc_class = arguments.mhc_class
     mhc_family = arguments.mhc_family
     peptide_data = arguments.peptide_data

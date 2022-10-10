@@ -17,7 +17,7 @@ def score_set(data_path, model_path, name):
     encoded_df = generate_encoded_df(encode_data, peptide_lenght, descriptors_df)
     prediction = model.predict(encoded_df)
     prediction_df = pd.DataFrame(prediction, columns=["prediction"])
-    prediction_df["sequence"] = df["sequence"]
+    prediction_df["sequence"] = df["cleavage_site"]
 
     if not os.path.exists('./output/'):
         os.mkdir('./output/')
@@ -41,8 +41,8 @@ def load_model(model_path):
     return model
 
 def read_data_table(path):
-    print("---> Reading training data...")
-    df = pd.read_csv(path, sep="\t", index_col=None, header=0)
+    print("---> Reading cleavage sites ...")
+    df = pd.read_csv(path)
     return df
 
 def read_descriptors_table():
@@ -60,7 +60,7 @@ def encode_sequence_data(sequence_table, df):
     for r in list("ACDEFGHIKLMNPQRSTVWY"):
         encode_map.setdefault(r, df.loc[r].tolist())
 
-    for sequence in sequence_table['sequence'].values:
+    for sequence in sequence_table['cleavage_site'].values:
         sequence_encode = []
         for r in sequence:
             sequence_encode.extend(encode_map[r])
