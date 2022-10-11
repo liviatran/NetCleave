@@ -1,0 +1,3 @@
+,epitope,protein_id,protein_seq,cleavage_site,prediction
+0,KAEEYEKM,protein_toy3,MANSTKAEEYKAEEYEKMKAE,YEKMKAE,0.565748
+1,MANSTKAEEY,protein_toy3,MANSTKAEEYKAEEYEKMKAE,AEEYKAE,0.77916324
