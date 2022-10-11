@@ -148,3 +148,64 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     df.to_csv(outfile, header=True, columns=cols, index=False)
 
     return outfile
+
+
+def generateCleavageSitesSequence(file):
+    """
+
+    PARAMETERS
+    ------------------------------------------------------------
+    · file: path to the csv file
+    ------------------------------------------------------------
+    """
+    if not os.path.exists('./output/'):
+        os.mkdir('./output/')
+
+    df = pd.read_csv(file)
+    cols = list(df.columns.values)
+
+    ids = df['protein_id'].values
+    seqs = df['protein_seq'].values
+    epitopes = df['epitope'].values
+    cleavage_sites = []
+    protein_sequences = []
+
+    for i,ps in enumerate(seqs):
+        identifier = ids[i]
+        # Generate FASTA file
+        fasta_name = 'output/'+identifier+'.fasta'
+        if not os.path.exists(fasta_name):
+            with open(fasta_name,'w') as outfile:
+                print('Generating FASTA file: {} ...'.format(fasta_name))
+                outfile.write('>'+identifier+'\n')
+                outfile.write(ps)
+
+    # Obtain cleavage sites
+    ne = 0
+    for e in epitopes:
+        print(e)
+        fasta_name = 'output/'+ids[ne]+'.fasta'
+        print(fasta_name)
+        name,sequence = readFasta(fasta_name)
+        peptides_dict = generateMERS('output/'+ids[ne]+'.fasta',len(e))
+        for key, v in peptides_dict.items():
+            if v == e:
+                index = key
+                flanking_region = sequence[key+len(e):key+len(e)+3]
+                cleavage_site = e[-4:] + flanking_region
+                print(cleavage_site)
+                cleavage_sites.append(cleavage_site)
+                protein_sequences.append(sequence)
+        ne+=1
+
+    print(cleavage_sites)
+
+    # Append cleavage sites to df
+    df['cleavage_site'] = cleavage_sites
+    cols.append('cleavage_site')
+    file = file.split('/')[-1].split('.')[0]
+    outfile = 'output/' + file + '_epitopes.csv'
+
+    df.to_csv(outfile, header=True, columns=cols, index=False)
+
+    return outfile

@@ -19,6 +19,10 @@ def parse_args():
                             dest = 'generate',
                             help='Generate training data for the neural network',
                             action='store_true')
+    parser.add_argument('--input_type',
+                            dest = 'input_type',
+                            help='',
+                            action='store',default=1,type=int)
     parser.add_argument('--mhc_class',
                             dest = 'mhc_class',
                             help='Major Histocompatibility Complex class',
@@ -51,12 +55,8 @@ def parse_args():
                             dest = 'type',
                             help='',
                             action='store',default=1,type=int)
-    parser.add_argument('--score_csv_uniprot',
-                            dest = 'score_csv_uniprot',
-                            help='',
-                            action='store',default='None')
-    parser.add_argument('--score_fasta',
-                            dest = 'score_fasta',
+    parser.add_argument('--score',
+                            dest = 'score',
                             help='',
                             action='store',default='None')
     return parser.parse_args()
@@ -97,7 +97,7 @@ def generating_data(uniprot_path, uniparc_path_headers, uniparc_path_sequence, t
     return selected_dictionary
 
 
-def main(generate=False, train=False, score_fasta=False, score_peptide=False):
+def main(generate=False, train=False, score=False):
     """
     This is the main function of the program.
 
@@ -112,7 +112,7 @@ def main(generate=False, train=False, score_fasta=False, score_peptide=False):
     training_data_path = 'data/training_data/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_family)
     models_export_path = 'data/models/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_family)
 
-    if not any([generate, train, score_fasta, score_peptide]):
+    if not any([generate, train, score]):
         print('Please, provide an argument. See python3 NetCleave.py -h for more information')
 
     if generate:
@@ -163,15 +163,20 @@ def main(generate=False, train=False, score_fasta=False, score_peptide=False):
     if train:
         run_NN.create_models(training_data_path, models_export_path)
 
-    if score_fasta!='None':
-        outfile = cleavage_site_generator.generateCleavageSites(score_fasta)
-        predict_csv.score_set(outfile, models_export_path, 'ABC')
+    if score!='None':
+        if input_type==1: # score fasta file
+            outfile = cleavage_site_generator.generateCleavageSites(score)
+            predict_csv.score_set(outfile, models_export_path, 'ABC')
 
-    if score_csv_uniprot!='None':
-        uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta'
-        uniprot_data = uniprot_extractor.extract_uniprot_data(uniprot_path)
-        outfile = cleavage_site_generator.generateCleavageSitesUniprot(score_csv_uniprot,uniprot_data)
-        predict_csv.score_set(outfile, models_export_path, 'ABC',uniprot=True)
+        if input_type==2: # score csv file with uniprot id
+            uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta'
+            uniprot_data = uniprot_extractor.extract_uniprot_data(uniprot_path)
+            outfile = cleavage_site_generator.generateCleavageSitesUniprot(score,uniprot_data)
+            predict_csv.score_set(outfile, models_export_path, 'ABC',uniprot=True)
+
+        if input_type==3: # score csv file with protein sequence
+            outfile = cleavage_site_generator.generateCleavageSitesSequence(score)
+            predict_csv.score_set(outfile, models_export_path, 'ABC',uniprot=True)
 
 
 
@@ -187,8 +192,8 @@ if __name__ == '__main__':
     technique = arguments.technique
     train = arguments.train
     type = arguments.type
-    score_fasta = arguments.score_fasta
-    score_csv_uniprot = arguments.score_csv_uniprot
+    input_type = arguments.input_type
+    score = arguments.score
 
     # Call main function
-    main(generate, train, score_fasta, score_csv_uniprot)
+    main(generate, train, score)
