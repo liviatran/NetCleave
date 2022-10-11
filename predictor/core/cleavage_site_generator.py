@@ -5,6 +5,14 @@ from Bio import SeqIO
 
 
 def readFasta(file):
+    """
+    Read a Fasta file and return the protein identifier and sequence.
+
+    PARAMETERS
+    ------------------------------------------------------------
+    · file: path to the Fasta file
+    ------------------------------------------------------------
+    """
 
     for seq_record in SeqIO.parse(file, "fasta"):
         name = seq_record.id
@@ -14,6 +22,15 @@ def readFasta(file):
 
 
 def generateMERS(file,length):
+    """
+    Generate short peptides from the whole sequence of a protein.
+
+    PARAMETERS
+    ------------------------------------------------------------
+    · file: path to the Fasta file
+    · length: peptide length
+    ------------------------------------------------------------
+    """
 
     name,sequence = readFasta(file)
 
@@ -28,6 +45,17 @@ def generateMERS(file,length):
 
 
 def generateCleavageSites(file):
+    """
+    Create a csv file with the cleavage sites of a set of peptides (generated using
+    the Fasta file of a protein of interest). The cleavage sites contain the necessary
+    sequence for NetCleave to predict the cleavage of a peptide, they consist in
+    short sequences of 4+3 amino acids.
+
+    PARAMETERS
+    ------------------------------------------------------------
+    · file: path to the Fasta file
+    ------------------------------------------------------------
+    """
 
     name,sequence = readFasta(file)
 
@@ -36,7 +64,7 @@ def generateCleavageSites(file):
     epitopes_len = []
     cleavage_sites = []
 
-
+    # Generate peptides 8 to 11 amino acids long
     for i in range(8,12):
         epitope_number = 1
         for key in generateMERS(file,i):
