@@ -27,6 +27,7 @@ NetCleave has the following dependencies:
 - [sklearn](https://scikit-learn.org/stable/)
 - [keras](https://keras.io/)
 - [tensorflow](https://www.tensorflow.org/)
+- [biopython](https://biopython.org/)
 
 ## How to use NetCleave
 
@@ -87,6 +88,3 @@ After running this command, NetCleave will parse IEDB and UniProt/UniParc inform
 > <p align="justify"> User should check the quality of the model. If the loss performance between the training and testing groups differ substantially or if there is any sign of overfitting, the user should modify predictor/ml_main/run_NN.py script. Usually, this phenomena happens because a very small dataset is used (a few peptides), which is not enough for building a high quality model. If this happens, consider to generate a more general model (for instance, instead of HLA-A0201, use HLA-A02 or HLA-A).
 </p>
 </p>
-
-
-

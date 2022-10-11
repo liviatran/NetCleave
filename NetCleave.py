@@ -19,15 +19,6 @@ def parse_args():
                             dest = 'generate',
                             help='Generate training data for the neural network',
                             action='store_true')
-    parser.add_argument('--input_csv',
-                            dest = 'input_csv',
-                            help='Path to the input csv file',
-                            action='store',
-                            default='input/example_file_NetCleave_score.csv')
-    parser.add_argument('--input_fasta',
-                            dest = 'input_fasta',
-                            help='Path to the input FASTA file',
-                            action='store')
     parser.add_argument('--mhc_class',
                             dest = 'mhc_class',
                             help='Major Histocompatibility Complex class',
@@ -60,10 +51,14 @@ def parse_args():
                             dest = 'type',
                             help='',
                             action='store',default=1,type=int)
-    parser.add_argument('--score_csv',
-                            dest = 'score_csv',
-                            help='Predict a set of cleavage sites from csv',
-                            action='store_true')
+    parser.add_argument('--score_peptide',
+                            dest = 'score_peptide',
+                            help='',
+                            action='store',default='None')
+    parser.add_argument('--score_fasta',
+                            dest = 'score_fasta',
+                            help='',
+                            action='store',default='None')
     return parser.parse_args()
 
 
@@ -102,7 +97,7 @@ def generating_data(uniprot_path, uniparc_path_headers, uniparc_path_sequence, t
     return selected_dictionary
 
 
-def main(generate=False, train=False, score_csv=False):
+def main(generate=False, train=False, score_fasta=False, score_peptide=False):
     """
     This is the main function of the program.
 
@@ -117,7 +112,7 @@ def main(generate=False, train=False, score_csv=False):
     training_data_path = 'data/training_data/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_family)
     models_export_path = 'data/models/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_family)
 
-    if not any([generate, train, score_csv]):
+    if not any([generate, train, score_fasta, score_peptide]):
         print('Please, provide an argument. See python3 NetCleave.py -h for more information')
 
     if generate:
@@ -168,9 +163,14 @@ def main(generate=False, train=False, score_csv=False):
     if train:
         run_NN.create_models(training_data_path, models_export_path)
 
-    if score_csv:
+    if score_fasta!='None':
         # predict_csv.score_set(input_csv, models_export_path, 'ABC')
-        outfile = cleavage_site_generator.generateCleavageSites(input_fasta)
+        outfile = cleavage_site_generator.generateCleavageSites(score_fasta)
+        predict_csv.score_set(outfile, models_export_path, 'ABC')
+
+    if score_peptide!='None':
+        # predict_csv.score_set(input_csv, models_export_path, 'ABC')
+        outfile = cleavage_site_generator.generateCleavageSites(score_fasta)
         predict_csv.score_set(outfile, models_export_path, 'ABC')
 
 
@@ -179,8 +179,6 @@ if __name__ == '__main__':
     # Get arguments
     arguments = parse_args()
     generate = arguments.generate
-    input_csv = arguments.input_csv
-    input_fasta = arguments.input_fasta
     mhc_class = arguments.mhc_class
     mhc_family = arguments.mhc_family
     peptide_data = arguments.peptide_data
@@ -188,7 +186,8 @@ if __name__ == '__main__':
     technique = arguments.technique
     train = arguments.train
     type = arguments.type
-    score_csv = arguments.score_csv
+    score_fasta = arguments.score_fasta
+    score_peptide = arguments.score_peptide
 
     # Call main function
-    main(generate, train, score_csv)
+    main(generate, train, score_fasta, score_peptide)

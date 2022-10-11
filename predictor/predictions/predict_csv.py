@@ -17,15 +17,18 @@ def score_set(data_path, model_path, name):
     encoded_df = generate_encoded_df(encode_data, peptide_lenght, descriptors_df)
     prediction = model.predict(encoded_df)
     prediction_df = pd.DataFrame(prediction, columns=["prediction"])
-    prediction_df["sequence"] = df["cleavage_site"]
+    df["prediction"] = prediction_df["prediction"]
+    df = df.set_index('epitope_id')
 
     if not os.path.exists('./output/'):
         os.mkdir('./output/')
 
-    export_path = "output/{}_NetCleave.csv".format(data_path.split('/')[1].split('.')[0])
-    prediction_df.to_csv(export_path)
-    print("Exporting predictions to: {}".format(export_path))
-    return prediction_df
+    outfile = data_path.split('.')[0] + '_prediction.csv'
+    df.to_csv(outfile, header=True)
+    os.remove(data_path)
+    print("Exporting predictions to: {}".format(outfile))
+
+    return df
 
 def load_model(model_path):
     model_file_path = "{}/{}_model.h5".format(model_path, model_path.split("/")[-1])
