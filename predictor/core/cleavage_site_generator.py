@@ -125,8 +125,6 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     ne = 0
     for e in epitopes:
         fasta_name = 'output/'+ids[ne]+'.fasta'
-        print(ids[ne])
-        print(fasta_name)
         name,sequence = readFasta(fasta_name)
         peptides_dict = generateMERS('output/'+ids[ne]+'.fasta',len(e))
         for key, v in peptides_dict.items():
@@ -183,9 +181,7 @@ def generateCleavageSitesSequence(file):
     # Obtain cleavage sites
     ne = 0
     for e in epitopes:
-        print(e)
         fasta_name = 'output/'+ids[ne]+'.fasta'
-        print(fasta_name)
         name,sequence = readFasta(fasta_name)
         peptides_dict = generateMERS('output/'+ids[ne]+'.fasta',len(e))
         for key, v in peptides_dict.items():
@@ -193,12 +189,9 @@ def generateCleavageSitesSequence(file):
                 index = key
                 flanking_region = sequence[key+len(e):key+len(e)+3]
                 cleavage_site = e[-4:] + flanking_region
-                print(cleavage_site)
                 cleavage_sites.append(cleavage_site)
                 protein_sequences.append(sequence)
         ne+=1
-
-    print(cleavage_sites)
 
     # Append cleavage sites to df
     df['cleavage_site'] = cleavage_sites
