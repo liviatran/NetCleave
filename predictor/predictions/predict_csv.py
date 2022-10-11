@@ -8,17 +8,19 @@ from keras.layers import Dense, Dropout
 from keras import backend as K
 from tensorflow.keras.optimizers import SGD
 
-def score_set(data_path, model_path, name):
-    peptide_lenght = 7
+def score_set(data_path, model_path, name, uniprot=False):
+
+    peptide_length = 7
     model = load_model(model_path)
     df = read_data_table(data_path)
     descriptors_df = read_descriptors_table()
     encode_data = encode_sequence_data(df, descriptors_df)
-    encoded_df = generate_encoded_df(encode_data, peptide_lenght, descriptors_df)
+    encoded_df = generate_encoded_df(encode_data, peptide_length, descriptors_df)
     prediction = model.predict(encoded_df)
     prediction_df = pd.DataFrame(prediction, columns=["prediction"])
     df["prediction"] = prediction_df["prediction"]
-    df = df.set_index('epitope_id')
+    if uniprot==False:
+        df = df.set_index('epitope_id')
 
     if not os.path.exists('./output/'):
         os.mkdir('./output/')
@@ -70,8 +72,8 @@ def encode_sequence_data(sequence_table, df):
         encode_data.append(sequence_encode)
     return encode_data
 
-def generate_encoded_df(encode_data, peptide_lenght, df):
+def generate_encoded_df(encode_data, peptide_length, df):
     print("---> Generating a descriptor dataframe...")
     descriptor_header = df.columns.tolist()
-    encoded_df = pd.DataFrame(encode_data, columns=["{}_{}".format(i, j) for i in range(peptide_lenght) for j in descriptor_header])
+    encoded_df = pd.DataFrame(encode_data, columns=["{}_{}".format(i, j) for i in range(peptide_length) for j in descriptor_header])
     return encoded_df

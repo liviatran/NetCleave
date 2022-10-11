@@ -51,8 +51,8 @@ def parse_args():
                             dest = 'type',
                             help='',
                             action='store',default=1,type=int)
-    parser.add_argument('--score_peptide',
-                            dest = 'score_peptide',
+    parser.add_argument('--score_csv_uniprot',
+                            dest = 'score_csv_uniprot',
                             help='',
                             action='store',default='None')
     parser.add_argument('--score_fasta',
@@ -164,14 +164,15 @@ def main(generate=False, train=False, score_fasta=False, score_peptide=False):
         run_NN.create_models(training_data_path, models_export_path)
 
     if score_fasta!='None':
-        # predict_csv.score_set(input_csv, models_export_path, 'ABC')
         outfile = cleavage_site_generator.generateCleavageSites(score_fasta)
         predict_csv.score_set(outfile, models_export_path, 'ABC')
 
-    if score_peptide!='None':
-        # predict_csv.score_set(input_csv, models_export_path, 'ABC')
-        outfile = cleavage_site_generator.generateCleavageSites(score_fasta)
-        predict_csv.score_set(outfile, models_export_path, 'ABC')
+    if score_csv_uniprot!='None':
+        uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta'
+        uniprot_data = uniprot_extractor.extract_uniprot_data(uniprot_path)
+        outfile = cleavage_site_generator.generateCleavageSitesUniprot(score_csv_uniprot,uniprot_data)
+        predict_csv.score_set(outfile, models_export_path, 'ABC',uniprot=True)
+
 
 
 if __name__ == '__main__':
@@ -187,7 +188,7 @@ if __name__ == '__main__':
     train = arguments.train
     type = arguments.type
     score_fasta = arguments.score_fasta
-    score_peptide = arguments.score_peptide
+    score_csv_uniprot = arguments.score_csv_uniprot
 
     # Call main function
-    main(generate, train, score_fasta, score_peptide)
+    main(generate, train, score_fasta, score_csv_uniprot)

@@ -90,3 +90,61 @@ def generateCleavageSites(file):
     df.to_csv(outfile, header=True, columns=['epitope_id','epitope','epitope_length','cleavage_site'], index=False)
 
     return outfile
+
+
+def generateCleavageSitesUniprot(file,uniprot_data):
+    """
+
+    PARAMETERS
+    ------------------------------------------------------------
+    · file: path to the csv file
+    · uniprot_data: Uniprot identifiers and the corresponding sequences,  obtained from local database
+    ------------------------------------------------------------
+    """
+    if not os.path.exists('./output/'):
+        os.mkdir('./output/')
+
+    df = pd.read_csv(file)
+    cols = list(df.columns.values)
+
+    ids = df['uniprot_id'].values
+    epitopes = df['epitope'].values
+    cleavage_sites = []
+    protein_sequences = []
+
+    for identifier in df['uniprot_id'].unique():
+
+        # Generate FASTA file
+        fasta_name = 'output/'+identifier+'.fasta'
+        with open(fasta_name,'w') as outfile:
+            print('Generating FASTA file: {} ...'.format(fasta_name))
+            outfile.write('>'+identifier+'\n')
+            outfile.write(uniprot_data[identifier])
+
+    # Obtain cleavage sites
+    ne = 0
+    for e in epitopes:
+        fasta_name = 'output/'+ids[ne]+'.fasta'
+        print(ids[ne])
+        print(fasta_name)
+        name,sequence = readFasta(fasta_name)
+        peptides_dict = generateMERS('output/'+ids[ne]+'.fasta',len(e))
+        for key, v in peptides_dict.items():
+            if v == e:
+                index = key
+                flanking_region = sequence[key+len(e):key+len(e)+3]
+                cleavage_site = e[-4:] + flanking_region
+                cleavage_sites.append(cleavage_site)
+                protein_sequences.append(sequence)
+        ne+=1
+
+    # Append cleavage sites to df
+    df['cleavage_site'] = cleavage_sites
+    df['protein_sequence'] = protein_sequences
+    cols.append('cleavage_site')
+    file = file.split('/')[-1].split('.')[0]
+    outfile = 'output/' + file + '_epitopes.csv'
+
+    df.to_csv(outfile, header=True, columns=cols, index=False)
+
+    return outfile
