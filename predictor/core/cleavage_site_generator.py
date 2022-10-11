@@ -87,6 +87,6 @@ def generateCleavageSites(file):
 
     fasta_name = file.split('/')[-1].split('.')[0]
     outfile = 'output/' + fasta_name + '_epitopes.csv'
-    df.to_csv(outfile, header=True,index=True)
+    df.to_csv(outfile, header=True, columns=['epitope_id','epitope','epitope_length','cleavage_site'], index=False)
 
     return outfile
