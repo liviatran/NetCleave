@@ -32,6 +32,7 @@ NetCleave has the following dependencies:
 ## How to use NetCleave
 
 <p align="justify">
+
 NetCleave is very easy to use. It has two main functionalities, which are **score** and **retrain**.
 
 ### Score
@@ -56,9 +57,17 @@ As an example, if you use the file `input/toy1.fasta`, which is a FASTA file, yo
 python NetCleave.py --score input/toy1.fasta --input_type 1
 ```
 
+### Retrain
+
+One of the main advantages of having a neural network model is that it can be retrained, so is is updated and can adapt to different goals. To do so, you can choose between:
+
+- **Generating your own custom data** and then **training** the model with it.
+
+- **Using pre-trained models** during the **training** of the model.
+
 </p>
 
-### Using pre-trained models
+#### Using pre-trained models
 
 <p align="justify">
 In order to use NetCleave, user needs to define a few parameters:
@@ -81,7 +90,7 @@ User needs to define **a sequence of seven (7) residues lenght** following the p
 After running this command, a csv file with the results will be generated.
 </p>
 
-### Retraining the method and constructing your own models
+#### Retraining the method and constructing your own models
 
 <p align="justify">
 NetCleave was specificaly designed to be easily retrained. In order to do so, user needs:
