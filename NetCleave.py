@@ -1,4 +1,5 @@
 import argparse
+import os
 from predictor.database_functions import peptide_extractor, uniprot_extractor, uniparc_extractor
 from predictor.core import all_peptide_uniprot_locator, all_training_data_generator, cleavage_site_generator
 from predictor.ml_main import run_NN
@@ -14,27 +15,39 @@ def parse_args():
     """
     Parse command-line arguments given by the user.
     """
-    parser = argparse.ArgumentParser(description = 'Arguments necessary for the main program execution.')
+    parser = argparse.ArgumentParser(description = 'Arguments necessary for NetCleave\'s execution.')
+    parser.add_argument('--epitope_length',
+                            dest = 'epitope_length',
+                            help='Desired length of the epitopes generated from a FASTA file.',
+                            action='store',default=0,type=int)
     parser.add_argument('--generate',
                             dest = 'generate',
-                            help='Generate training data for the neural network',
+                            help='Generate custom training data for later training the neural network.',
                             action='store_true')
     parser.add_argument('--input_type',
                             dest = 'input_type',
-                            help='',
+                            help="""Type of data used as input for predicting C-terminal antigen processing:
+                            1- FASTA file of a single protein, from which epitopes (8 to 11 residue-long) will be generated and scored.
+                            2- CSV file with peptide sequences to score (column name: epitope) and the UniProt identifier of the protein where they come (column name: uniprot_id). NetCleave will retrieve the sequence of the whole protein, and create the 4+3 sequences that conform the cleavage site and are necessary for the scoring method.
+                            3- CSV file with peptide sequences to score (column name: epitope), the identifier (column name: protein_id) and sequence of the protein where they come (column name: protein_seq). Same as type 2, those complete protein sequences will be used to create the 4+3 sequences.
+                            """,
                             action='store',default=1,type=int)
-    parser.add_argument('--mhc_class',
-                            dest = 'mhc_class',
-                            help='Major Histocompatibility Complex class',
-                            action='store',default='I')
-    parser.add_argument('--mhc_family',
-                            dest = 'mhc_family',
-                            help='Major Histocompatibility Complex allele',
+    parser.add_argument('--mhc_allele',
+                            dest = 'mhc_allele',
+                            help='Major Histocompatibility Complex allele.',
                             action='store',
                             default='HLA')
+    parser.add_argument('--mhc_class',
+                            dest = 'mhc_class',
+                            help='Major Histocompatibility Complex class. It can be either class I or II.',
+                            action='store',default='I')
+    parser.add_argument('--mhc_option',
+                            dest = 'mhc_option',
+                            help='Prints characteristics of the available pre-trained models located at /data/models. It describes the mhc_allele, mhc_class and technique.',
+                            action='store_true')
     parser.add_argument('--peptide_data',
                             dest = 'peptide_data',
-                            help='Path to peptide data to use for generating data to later train the model',
+                            help='Path to peptide data to use for generating data to later train the model.',
                             action='store',
                             default='./data/databases/iedb/mhc_ligand_full.csv')
     parser.add_argument('--peptide_data_additional',
@@ -42,23 +55,30 @@ def parse_args():
                             help='Path to additional peptide data to use (combined with IEDB data) for generating data to later train the model',
                             action='store',
                             default='./data/databases/other/HLA.csv')
+    parser.add_argument('--predict',
+                            dest = 'predict',
+                            help='Predict the C-terminal cleavage of peptides. Indicate the input file using this flag. For example: python NetCleave.py --predict input/toy1.fasta --input_type 1 --mhc_class II',
+                            action='store',default='None')
     parser.add_argument('--technique',
                             dest = 'technique',
-                            help='',
+                            help='Experimental technique used to obtain data.',
                             action='store',
                             default='mass spectrometry')
     parser.add_argument('--train',
                             dest = 'train',
-                            help='Train the neural network',
+                            help="""Train NetCleave's neural network model.
+                            One of the main advantages of having a neural network model is that it can be retrained, so it is updated and adapt to your specific goal.
+                            To do so, you can choose between (a) Generating your own custom data and then training the model with it; (b) Using pre-trained models during the training of the model.
+                            """,
                             action='store_true')
     parser.add_argument('--type',
                             dest = 'type',
-                            help='',
+                            help="""
+                            Type of model training: (1) using a newer version of the Immune Epitope Database (IEDB),
+                            (2) combining the IEDB with additional data from other sources and (3) using other data sources without taking into account the IEDB.
+                            """,
                             action='store',default=1,type=int)
-    parser.add_argument('--score',
-                            dest = 'score',
-                            help='',
-                            action='store',default='None')
+
     return parser.parse_args()
 
 
@@ -97,7 +117,7 @@ def generating_data(uniprot_path, uniparc_path_headers, uniparc_path_sequence, t
     return selected_dictionary
 
 
-def main(generate=False, train=False, score=False):
+def main(generate=False, train=False, predict=False):
     """
     This is the main function of the program.
 
@@ -105,14 +125,14 @@ def main(generate=False, train=False, score=False):
     ------------------------------------------------------------
     · generate: generate training data for the neural network
     · train: train the neural network with previously generated data
-    · score_csv: predict a set of cleavage sites from a csv file
+    · predict: predict a set of cleavage sites from a csv file
     ------------------------------------------------------------
     """
 
-    training_data_path = 'data/training_data/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_family)
-    models_export_path = 'data/models/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_family)
+    training_data_path = 'data/training_data/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_allele)
+    models_export_path = 'data/models/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_allele)
 
-    if not any([generate, train, score]):
+    if not any([generate, train, predict]):
         print('Please, provide an argument. See python3 NetCleave.py -h for more information')
 
     if generate:
@@ -126,7 +146,7 @@ def main(generate=False, train=False, score=False):
                                 'Description': None, 'Parent Protein IRI': None,
                                 'Method/Technique': ('contains', technique),
                                 'MHC allele class': ('match', mhc_class),
-                                'Allele Name': ('contains', mhc_family),
+                                'Allele Name': ('contains', mhc_allele),
                                  #'Name': ('contains', 'Homo sapiens'),
                                  #'Parent Species': ('contains', 'Homo sapiens')
                                  }
@@ -138,7 +158,7 @@ def main(generate=False, train=False, score=False):
                                 'Description': None, 'Parent Protein IRI': None,
                                 'Method/Technique': ('contains', technique),
                                 'MHC allele class': ('match', mhc_class),
-                                'Allele Name': ('contains', mhc_family),
+                                'Allele Name': ('contains', mhc_allele),
                                  #'Name': ('contains', 'Homo sapiens'),
                                  #'Parent Species': ('contains', 'Homo sapiens')
                                  }
@@ -163,19 +183,23 @@ def main(generate=False, train=False, score=False):
     if train:
         run_NN.create_models(training_data_path, models_export_path)
 
-    if score!='None':
-        if input_type==1: # score fasta file
-            outfile = cleavage_site_generator.generateCleavageSites(score)
-            predict_csv.score_set(outfile, models_export_path, 'ABC')
+    if predict!='None':
+        if input_type==1: # predict fasta file
+            if epitope_length!=0:
+                outfile = cleavage_site_generator.generateCleavageSites(predict,custom_length=epitope_length)
+                predict_csv.score_set(outfile, models_export_path, 'ABC')
+            else:
+                outfile = cleavage_site_generator.generateCleavageSites(predict,mhc=mhc_class)
+                predict_csv.score_set(outfile, models_export_path, 'ABC')
 
-        if input_type==2: # score csv file with uniprot id
+        if input_type==2: # predict csv file with uniprot id
             uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta'
             uniprot_data = uniprot_extractor.extract_uniprot_data(uniprot_path)
-            outfile = cleavage_site_generator.generateCleavageSitesUniprot(score,uniprot_data)
+            outfile = cleavage_site_generator.generateCleavageSitesUniprot(predict,uniprot_data)
             predict_csv.score_set(outfile, models_export_path, 'ABC',uniprot=True)
 
-        if input_type==3: # score csv file with protein sequence
-            outfile = cleavage_site_generator.generateCleavageSitesSequence(score)
+        if input_type==3: # predict csv file with protein sequence
+            outfile = cleavage_site_generator.generateCleavageSitesSequence(predict)
             predict_csv.score_set(outfile, models_export_path, 'ABC',uniprot=True)
 
 
@@ -184,16 +208,26 @@ if __name__ == '__main__':
 
     # Get arguments
     arguments = parse_args()
+    epitope_length = arguments.epitope_length
     generate = arguments.generate
+    input_type = arguments.input_type
+    mhc_allele = arguments.mhc_allele
     mhc_class = arguments.mhc_class
-    mhc_family = arguments.mhc_family
+    mhc_option = arguments.mhc_option
     peptide_data = arguments.peptide_data
     peptide_data_additional = arguments.peptide_data_additional
+    predict = arguments.predict
     technique = arguments.technique
     train = arguments.train
     type = arguments.type
-    input_type = arguments.input_type
-    score = arguments.score
+
+    if mhc_option:
+        files = sorted(os.listdir('./data/models'))
+        print('\nAVAILABLE PRE-TRAINED MODELS:')
+        for n,i in enumerate(files):
+            elements=i.split('_')
+            print('\nModel {}\n ·mhc_allele:{}\n ·mhc_class:{}\n ·technique:{}\n'.format(n+1,elements[2],elements[0],elements[1]))
+        exit()
 
     # Call main function
-    main(generate, train, score)
+    main(generate, train, predict)

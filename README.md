@@ -33,28 +33,28 @@ NetCleave has the following dependencies:
 
 <p align="justify">
 
-NetCleave is very easy to use. It has two main functionalities, which are **score** and **retrain**.
+NetCleave is very easy to use. It has two main functionalities, which are **predict** and **retrain**.
 
-### Score
+### Predict
 
 The scoring option can be used to predict the C-terminal cleavage of peptides. It allows three different types of input:
 
 1. FASTA file of a single protein, from which epitopes (8 to 11 residue-long) will be generated and scored.
 
-2. CSV file with peptide sequences to score (column name: *epitope*) and the UniProt identifier of the protein where they come (column name: *uniprot_id*). NetCleave will retrieve the sequence of the whole protein, and create the 4+3 sequences that conform the cleavage site and are necessary for the scoring method.
+2. CSV file with peptide sequences to predict (column name: *epitope*) and the UniProt identifier of the protein where they come (column name: *uniprot_id*). NetCleave will retrieve the sequence of the whole protein, and create the 4+3 sequences that conform the cleavage site and are necessary for the scoring method.
 
-3. CSV file with peptide sequences to score (column name: *epitope*), the identifier (column name: *protein_id*) and sequence of the protein where they come (column name: *protein_seq*). Same as type 2, those complete protein sequences will be used to create the 4+3 sequences.
+3. CSV file with peptide sequences to predict (column name: *epitope*), the identifier (column name: *protein_id*) and sequence of the protein where they come (column name: *protein_seq*). Same as type 2, those complete protein sequences will be used to create the 4+3 sequences.
 
-To run the **score** option, please use the arguments **--score**, followed by the path to the input file, and **input_type**, followed by the type of input you are using (previous types explained 1,2,3).
+To run the **predict** option, please use the arguments **--predict**, followed by the path to the input file, and **input_type**, followed by the type of input you are using (previous types explained 1,2,3).
 
 ```
-python NetCleave.py --score (path to file) --input_type (type of input file)
+python NetCleave.py --predict (path to file) --input_type (type of input file)
 ```
 
 As an example, if you use the file `input/toy1.fasta`, which is a FASTA file, you have to run the following command:
 
 ```
-python NetCleave.py --score input/toy1.fasta --input_type 1
+python NetCleave.py --predict input/toy1.fasta --input_type 1
 ```
 
 ### Retrain
