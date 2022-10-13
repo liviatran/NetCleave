@@ -59,7 +59,7 @@ python NetCleave.py --score input/toy1.fasta --input_type 1
 
 ### Retrain
 
-One of the main advantages of having a neural network model is that it can be retrained, so is is updated and can adapt to different goals. To do so, you can choose between:
+One of the main advantages of having a neural network model is that it can be retrained, so it is updated and adapt to your specific goal. To do so, you can choose between:
 
 - **Generating your own custom data** and then **training** the model with it.
 
