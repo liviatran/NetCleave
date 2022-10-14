@@ -149,7 +149,7 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     df['protein_sequence'] = protein_sequences
     cols.append('cleavage_site')
     file = file.split('/')[-1].split('.')[0]
-    outfile = 'output/' + file + '_epitopes.csv'
+    outfile = 'output/' + file + '.csv'
 
     df.to_csv(outfile, header=True, columns=cols, index=False)
 
@@ -214,7 +214,7 @@ def generateCleavageSitesSequence(file):
 
     cols.append('cleavage_site')
     file = file.split('/')[-1].split('.')[0]
-    outfile = 'output/' + file + '_epitopes.csv'
+    outfile = 'output/' + file + '.csv'
 
     df.to_csv(outfile, header=True, columns=cols, index=False)
 
