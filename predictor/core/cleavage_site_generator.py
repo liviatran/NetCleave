@@ -44,7 +44,7 @@ def generateMERS(file,length):
     return peptides_mers
 
 
-def generateCleavageSites(file):
+def generateCleavageSites(file,mhc=None,custom_length=None):
     """
     Create a csv file with the cleavage sites of a set of peptides (generated using
     the Fasta file of a protein of interest). The cleavage sites contain the necessary
@@ -54,6 +54,8 @@ def generateCleavageSites(file):
     PARAMETERS
     ------------------------------------------------------------
     · file: path to the Fasta file
+    · mhc: Major Histocompatibility Complex class. If I, generate 8-11 mers; if II, generate 13-17 mers.
+    · custom_length:
     ------------------------------------------------------------
     """
 
@@ -64,8 +66,14 @@ def generateCleavageSites(file):
     epitopes_len = []
     cleavage_sites = []
 
-    # Generate peptides 8 to 11 amino acids long
-    for i in range(8,12):
+    if mhc=='I': # Generate peptides 8 to 11 amino acids long
+        length_range = range(8,12)
+    if mhc=='II': # Generate peptides 8 to 11 amino acids long
+        length_range = range(13,18)
+    if custom_length!=None:
+        length_range = range(custom_length,custom_length+1)
+
+    for i in length_range:
         epitope_number = 1
         for key in generateMERS(file,i):
             seq = generateMERS(file,i)[key]
@@ -111,6 +119,7 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     epitopes = df['epitope'].values
     cleavage_sites = []
     protein_sequences = []
+    accepted_epitopes = []
 
     for identifier in df['uniprot_id'].unique():
 
@@ -135,6 +144,9 @@ def generateCleavageSitesUniprot(file,uniprot_data):
                 cleavage_sites.append(cleavage_site)
                 protein_sequences.append(sequence)
         ne+=1
+        if e not in accepted_epitopes:
+            cleavage_sites.append('N/A')
+            protein_sequences.append(sequence)
 
     # Append cleavage sites to df
     df['cleavage_site'] = cleavage_sites
@@ -162,11 +174,13 @@ def generateCleavageSitesSequence(file):
     df = pd.read_csv(file)
     cols = list(df.columns.values)
 
-    ids = df['protein_id'].values
+    ids = df['protein_name'].values
     seqs = df['protein_seq'].values
     epitopes = df['epitope'].values
     cleavage_sites = []
     protein_sequences = []
+    accepted_epitopes = []
+    rejected_epitopes = []
 
     for i,ps in enumerate(seqs):
         identifier = ids[i]
@@ -191,10 +205,17 @@ def generateCleavageSitesSequence(file):
                 cleavage_site = e[-4:] + flanking_region
                 cleavage_sites.append(cleavage_site)
                 protein_sequences.append(sequence)
+                accepted_epitopes.append(e)
         ne+=1
+        if e not in accepted_epitopes:
+            rejected_epitopes.append(e)
 
     # Append cleavage sites to df
-    df['cleavage_site'] = cleavage_sites
+    try:
+        df['cleavage_site'] = cleavage_sites
+    except:
+        raise Exception('The following epitope/s are not found in the protein sequence: ',rejected_epitopes)
+
     cols.append('cleavage_site')
     file = file.split('/')[-1].split('.')[0]
     outfile = 'output/' + file + '_epitopes.csv'
