@@ -119,7 +119,6 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     epitopes = df['epitope'].values
     cleavage_sites = []
     protein_sequences = []
-    accepted_epitopes = []
 
     for identifier in df['uniprot_id'].unique():
 
@@ -144,9 +143,6 @@ def generateCleavageSitesUniprot(file,uniprot_data):
                 cleavage_sites.append(cleavage_site)
                 protein_sequences.append(sequence)
         ne+=1
-        if e not in accepted_epitopes:
-            cleavage_sites.append('N/A')
-            protein_sequences.append(sequence)
 
     # Append cleavage sites to df
     df['cleavage_site'] = cleavage_sites

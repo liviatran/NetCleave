@@ -41,8 +41,8 @@ def parse_args():
                             dest = 'mhc_class',
                             help='Major Histocompatibility Complex class. It can be either class I or II.',
                             action='store',default='I')
-    parser.add_argument('--mhc_option',
-                            dest = 'mhc_option',
+    parser.add_argument('--mhc_options',
+                            dest = 'mhc_options',
                             help='Prints characteristics of the available pre-trained models located at /data/models. It describes the mhc_allele, mhc_class and technique.',
                             action='store_true')
     parser.add_argument('--peptide_data',
@@ -213,7 +213,7 @@ if __name__ == '__main__':
     input_type = arguments.input_type
     mhc_allele = arguments.mhc_allele
     mhc_class = arguments.mhc_class
-    mhc_option = arguments.mhc_option
+    mhc_options = arguments.mhc_options
     peptide_data = arguments.peptide_data
     peptide_data_additional = arguments.peptide_data_additional
     predict = arguments.predict
@@ -221,7 +221,7 @@ if __name__ == '__main__':
     train = arguments.train
     type = arguments.type
 
-    if mhc_option:
+    if mhc_options:
         files = sorted(os.listdir('./data/models'))
         print('\nAVAILABLE PRE-TRAINED MODELS:')
         for n,i in enumerate(files):
