@@ -21,7 +21,7 @@ def score_set(data_path, model_path, name, uniprot=False):
     df['prediction'] = prediction_df['prediction']
     df['prediction'][df.cleavage_site.isna()] = np.nan
     df['warning'] = ''
-    df['warning'][df.cleavage_site.isna()] = 'Problem with cleavage site generation. Either epitope not found in protein or protein doesn\'t exist.'
+    df['warning'][df.cleavage_site.isna()] = 'problem_epitope_generation'
     if uniprot==False:
         df = df.set_index('epitope_id')
 
@@ -69,7 +69,6 @@ def encode_sequence_data(sequence_table, df):
         encode_map.setdefault(r, df.loc[r].tolist())
 
     for sequence in sequence_table['cleavage_site'].values:
-        print(sequence)
         sequence_encode = []
         try:
             for r in sequence:

@@ -164,7 +164,6 @@ def generateCleavageSitesUniprot(file,uniprot_data):
             protein_sequences.append(sequence)
     # Append cleavage sites to df
     df['cleavage_site'] = cleavage_sites
-    print(df['cleavage_site'])
     df['protein_sequence'] = protein_sequences
     cols.append('cleavage_site')
     file = file.split('/')[-1].split('.')[0]
