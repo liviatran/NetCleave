@@ -17,8 +17,11 @@ def score_set(data_path, model_path, name, uniprot=False):
     encode_data = encode_sequence_data(df, descriptors_df)
     encoded_df = generate_encoded_df(encode_data, peptide_length, descriptors_df)
     prediction = model.predict(encoded_df)
-    prediction_df = pd.DataFrame(prediction, columns=["prediction"])
-    df["prediction"] = prediction_df["prediction"]
+    prediction_df = pd.DataFrame(prediction, columns=['prediction'])
+    df['prediction'] = prediction_df['prediction']
+    # df.replace(r'', np.nan)
+    # df['prediction'][df.cleavage_site == np.nan] = np.nan
+    df['prediction'][df.cleavage_site == ''] = np.nan
     if uniprot==False:
         df = df.set_index('epitope_id')
 
@@ -28,7 +31,7 @@ def score_set(data_path, model_path, name, uniprot=False):
     outfile = data_path.split('.')[0] + '_NetCleave.csv'
     df.to_csv(outfile, header=True)
     os.remove(data_path)
-    print("Exporting predictions to: {}".format(outfile))
+    print('Exporting predictions to: {}'.format(outfile))
 
     return df
 
@@ -66,10 +69,17 @@ def encode_sequence_data(sequence_table, df):
         encode_map.setdefault(r, df.loc[r].tolist())
 
     for sequence in sequence_table['cleavage_site'].values:
+        print(sequence)
         sequence_encode = []
-        for r in sequence:
-            sequence_encode.extend(encode_map[r])
-        encode_data.append(sequence_encode)
+        try:
+            for r in sequence:
+                sequence_encode.extend(encode_map[r])
+            encode_data.append(sequence_encode)
+        except:
+            sequence = 'YYYYYYY'
+            for r in sequence:
+                sequence_encode.extend(encode_map[r])
+            encode_data.append(sequence_encode)
     return encode_data
 
 def generate_encoded_df(encode_data, peptide_length, df):

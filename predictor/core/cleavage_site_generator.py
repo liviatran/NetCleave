@@ -2,7 +2,8 @@ import argparse
 import os
 import pandas as pd
 from Bio import SeqIO
-
+import requests as r
+from io import StringIO
 
 def readFasta(file):
     """
@@ -100,6 +101,18 @@ def generateCleavageSites(file,mhc=None,custom_length=None):
     return outfile
 
 
+def retrieveSequenceFromUniprot(protein_code):
+
+    url="http://www.uniprot.org/uniprotkb/"+protein_code+".fasta"
+    response = r.post(url)
+    data=''.join(response.text)
+    seq=StringIO(data)
+    seq_list=list(SeqIO.parse(seq,'fasta'))
+    protein_seq = str(seq_list[0].seq)
+    print(protein_seq)
+    return protein_seq
+
+
 def generateCleavageSitesUniprot(file,uniprot_data):
     """
 
@@ -111,6 +124,8 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     """
     if not os.path.exists('./output/'):
         os.mkdir('./output/')
+    if not os.path.exists('./output/uniprot_fasta_files/'):
+        os.mkdir('./output/uniprot_fasta_files/')
 
     df = pd.read_csv(file)
     cols = list(df.columns.values)
@@ -124,10 +139,11 @@ def generateCleavageSitesUniprot(file,uniprot_data):
 
         # Generate FASTA file
         fasta_name = 'output/'+identifier+'.fasta'
+        sequence = retrieveSequenceFromUniprot(identifier)
         with open(fasta_name,'w') as outfile:
             print('Generating FASTA file: {} ...'.format(fasta_name))
             outfile.write('>'+identifier+'\n')
-            outfile.write(uniprot_data[identifier])
+            outfile.write(sequence)
 
     # Obtain cleavage sites
     ne = 0
@@ -143,9 +159,12 @@ def generateCleavageSitesUniprot(file,uniprot_data):
                 cleavage_sites.append(cleavage_site)
                 protein_sequences.append(sequence)
         ne+=1
-
+        if len(cleavage_sites)!= ne:
+            cleavage_sites.append('nan')
+            protein_sequences.append(sequence)
     # Append cleavage sites to df
     df['cleavage_site'] = cleavage_sites
+    print(df['cleavage_site'])
     df['protein_sequence'] = protein_sequences
     cols.append('cleavage_site')
     file = file.split('/')[-1].split('.')[0]
