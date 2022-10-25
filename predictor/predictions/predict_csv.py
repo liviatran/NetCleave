@@ -19,9 +19,7 @@ def score_set(data_path, model_path, name, uniprot=False):
     prediction = model.predict(encoded_df)
     prediction_df = pd.DataFrame(prediction, columns=['prediction'])
     df['prediction'] = prediction_df['prediction']
-    # df.replace(r'', np.nan)
-    # df['prediction'][df.cleavage_site == np.nan] = np.nan
-    df['prediction'][df.cleavage_site == ''] = np.nan
+    df['prediction'][df.cleavage_site.isna()] = np.nan
     if uniprot==False:
         df = df.set_index('epitope_id')
 
