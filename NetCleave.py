@@ -28,8 +28,8 @@ def parse_args():
                             dest = 'generate',
                             help='Generate custom training data for later training the neural network.',
                             action='store_true')
-    parser.add_argument('--input_type',
-                            dest = 'input_type',
+    parser.add_argument('--pred_input',
+                            dest = 'pred_input',
                             help="""Type of data used as input for predicting C-terminal antigen processing:
                             1- FASTA file of a single protein, from which epitopes (8 to 11 residue-long) will be generated and scored.
                             2- CSV file with peptide sequences to score (column name: epitope) and the UniProt identifier of the protein where they come (column name: uniprot_id). NetCleave will retrieve the sequence of the whole protein, and create the 4+3 sequences that conform the cleavage site and are necessary for the scoring method.
@@ -61,7 +61,7 @@ def parse_args():
                             default='./data/databases/other/HLA.csv')
     parser.add_argument('--predict',
                             dest = 'predict',
-                            help='Predict the C-terminal cleavage of peptides. Indicate the input file using this flag. For example: python NetCleave.py --predict input/toy1.fasta --input_type 1 --mhc_class II',
+                            help='Predict the C-terminal cleavage of peptides. Indicate the input file using this flag. For example: python NetCleave.py --predict input/toy1.fasta --pred_input 1 --mhc_class II',
                             action='store',default='None')
     parser.add_argument('--technique',
                             dest = 'technique',
@@ -75,8 +75,8 @@ def parse_args():
                             To do so, you can choose between (a) Generating your own custom data and then training the model with it; (b) Using pre-trained models during the training of the model.
                             """,
                             action='store_true')
-    parser.add_argument('--type',
-                            dest = 'type',
+    parser.add_argument('--train_input',
+                            dest = 'train_input',
                             help="""
                             Type of model training: (1) using a newer version of the Immune Epitope Database (IEDB),
                             (2) combining the IEDB with additional data from other sources and (3) using other data sources without taking into account the IEDB.
@@ -102,13 +102,13 @@ def generating_data(uniprot_path, uniparc_path_headers, uniparc_path_sequence, t
     """
 
     # Get data from files
-    if type==1:
+    if train_input==1:
         peptide_data = peptide_extractor.extract_peptide_data(iedb_path,conditions,iedb=True)
-    elif type==2:
+    elif train_input==2:
         peptide_data1 = peptide_extractor.extract_peptide_data(iedb_path,conditions,iedb=True)
         peptide_data2 = peptide_extractor.extract_peptide_data(other_path,iedb=False)
         peptide_data = peptide_extractor.merge_peptide_data(peptide_data1,peptide_data2)
-    elif type==3:
+    elif train_input==3:
         peptide_data = peptide_extractor.extract_peptide_data(other_path,iedb=False)
 
     uniprot_data = uniprot_extractor.extract_uniprot_data(uniprot_path)
@@ -143,11 +143,11 @@ def main(generate=False, train=False, predict=False):
         print('Please, provide an argument. See python3 NetCleave.py -h for more information')
 
     if generate:
-        print('Generating training data, type {}...'.format(type))
+        print('Generating training data, type {}...'.format(train_input))
         uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta' # download and decompress from https://www.uniprot.org/downloads REVIEWED fasta
         uniparc_path_headers = 'data/databases/uniparc/uniparc-yourlist_M20200416A94466D2655679D1FD8953E075198DA854EB3ES.tab'
         uniparc_path_sequence = 'data/databases/uniparc/uniparc-yourlist_M20200416A94466D2655679D1FD8953E075198DA854EB3ES.fasta'
-        if type==1:
+        if train_input==1:
             peptide_path = peptide_data
             iedb_conditions = {
                                 'Description': None, 'Parent Protein IRI': None,
@@ -157,8 +157,8 @@ def main(generate=False, train=False, predict=False):
                                  #'Name': ('contains', 'Homo sapiens'),
                                  #'Parent Species': ('contains', 'Homo sapiens')
                                  }
-            selected_dictionary = generating_data(uniprot_path,uniparc_path_headers,uniparc_path_sequence,type=1,iedb_path=peptide_path,conditions=iedb_conditions)
-        elif type==2:
+            selected_dictionary = generating_data(uniprot_path,uniparc_path_headers,uniparc_path_sequence,train_input=1,iedb_path=peptide_path,conditions=iedb_conditions)
+        elif train_input==2:
             peptide_path = peptide_data
             peptide_path2 = peptide_data_additional
             iedb_conditions = {
@@ -172,16 +172,16 @@ def main(generate=False, train=False, predict=False):
             selected_dictionary = generating_data(uniprot_path,
                                                       uniparc_path_headers,
                                                       uniparc_path_sequence,
-                                                      type=2,
+                                                      train_input=2,
                                                       iedb_path=peptide_path,
                                                       conditions=iedb_conditions,
                                                       other_path=peptide_path2)
-        elif type==3:
+        elif train_input==3:
             peptide_path = peptide_data
             selected_dictionary = generating_data(uniprot_path,
                                                       uniparc_path_headers,
                                                       uniparc_path_sequence,
-                                                      type=3,
+                                                      train_input=3,
                                                       other_path=peptide_path)
 
         all_training_data_generator.prepare_cleavage_data(selected_dictionary, training_data_path)
@@ -190,7 +190,7 @@ def main(generate=False, train=False, predict=False):
         run_NN.create_models(training_data_path, models_export_path)
 
     if predict!='None':
-        if input_type==1: # predict fasta file
+        if pred_input==1: # predict fasta file
             if epitope_length!=0:
                 outfile = cleavage_site_generator.generateCleavageSites(predict,custom_length=epitope_length)
                 predict_csv.score_set(outfile, models_export_path, 'ABC')
@@ -198,13 +198,13 @@ def main(generate=False, train=False, predict=False):
                 outfile = cleavage_site_generator.generateCleavageSites(predict,mhc=mhc_class)
                 predict_csv.score_set(outfile, models_export_path, 'ABC')
 
-        if input_type==2: # predict csv file with uniprot id
+        if pred_input==2: # predict csv file with uniprot id
             uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta'
             uniprot_data = uniprot_extractor.extract_uniprot_data(uniprot_path)
             outfile = cleavage_site_generator.generateCleavageSitesUniprot(predict,uniprot_data)
             predict_csv.score_set(outfile, models_export_path, 'ABC',uniprot=True)
 
-        if input_type==3: # predict csv file with protein sequence
+        if pred_input==3: # predict csv file with protein sequence
             outfile = cleavage_site_generator.generateCleavageSitesSequence(predict)
             predict_csv.score_set(outfile, models_export_path, 'ABC',uniprot=True)
 
@@ -216,7 +216,7 @@ if __name__ == '__main__':
     arguments = parse_args()
     epitope_length = arguments.epitope_length
     generate = arguments.generate
-    input_type = arguments.input_type
+    pred_input = arguments.pred_input
     mhc_allele = arguments.mhc_allele
     mhc_class = arguments.mhc_class
     mhc_options = arguments.mhc_options
@@ -226,7 +226,7 @@ if __name__ == '__main__':
     technique = arguments.technique
     train = arguments.train
     data_path = arguments.data_path
-    type = arguments.type
+    train_input = arguments.train_input
 
     if mhc_options:
         files = sorted(os.listdir('./data/models'))
