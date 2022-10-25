@@ -20,6 +20,8 @@ def score_set(data_path, model_path, name, uniprot=False):
     prediction_df = pd.DataFrame(prediction, columns=['prediction'])
     df['prediction'] = prediction_df['prediction']
     df['prediction'][df.cleavage_site.isna()] = np.nan
+    df['warning'] = ''
+    df['warning'][df.cleavage_site.isna()] = 'Problem with cleavage site generation. Either epitope not found in protein or protein doesn\'t exist.'
     if uniprot==False:
         df = df.set_index('epitope_id')
 
