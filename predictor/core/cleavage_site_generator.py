@@ -109,7 +109,6 @@ def retrieveSequenceFromUniprot(protein_code):
     seq=StringIO(data)
     seq_list=list(SeqIO.parse(seq,'fasta'))
     protein_seq = str(seq_list[0].seq)
-    print(protein_seq)
     return protein_seq
 
 
