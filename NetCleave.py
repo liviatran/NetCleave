@@ -16,6 +16,10 @@ def parse_args():
     Parse command-line arguments given by the user.
     """
     parser = argparse.ArgumentParser(description = 'Arguments necessary for NetCleave\'s execution.')
+    parser.add_argument('--data_path',
+                            dest = 'data_path',
+                            help='Path to the training data.',
+                            action='store',default='None')
     parser.add_argument('--epitope_length',
                             dest = 'epitope_length',
                             help='Desired length of the epitopes generated from a FASTA file.',
@@ -129,7 +133,10 @@ def main(generate=False, train=False, predict=False):
     ------------------------------------------------------------
     """
 
-    training_data_path = 'data/training_data/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_allele)
+    if data_path!= 'None':
+        training_data_path = data_path
+    else:
+        training_data_path = 'data/training_data/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_allele)
     models_export_path = 'data/models/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_allele)
 
     if not any([generate, train, predict]):
@@ -177,7 +184,6 @@ def main(generate=False, train=False, predict=False):
                                                       type=3,
                                                       other_path=peptide_path)
 
-
         all_training_data_generator.prepare_cleavage_data(selected_dictionary, training_data_path)
 
     if train:
@@ -219,6 +225,7 @@ if __name__ == '__main__':
     predict = arguments.predict
     technique = arguments.technique
     train = arguments.train
+    data_path = arguments.data_path
     type = arguments.type
 
     if mhc_options:
