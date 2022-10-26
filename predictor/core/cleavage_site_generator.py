@@ -123,8 +123,8 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     """
     if not os.path.exists('./output/'):
         os.mkdir('./output/')
-    if not os.path.exists('./output/uniprot_fasta_files/'):
-        os.mkdir('./output/uniprot_fasta_files/')
+    if not os.path.exists('./output/fasta_files/'):
+        os.mkdir('./output/fasta_files/')
 
     df = pd.read_csv(file)
     cols = list(df.columns.values)
@@ -137,7 +137,7 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     for identifier in df['uniprot_id'].unique():
 
         # Generate FASTA file
-        fasta_name = 'output/'+identifier+'.fasta'
+        fasta_name = 'output/fasta_files/'+identifier+'.fasta'
         sequence = retrieveSequenceFromUniprot(identifier)
         with open(fasta_name,'w') as outfile:
             print('Generating FASTA file: {} ...'.format(fasta_name))
@@ -147,9 +147,9 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     # Obtain cleavage sites
     ne = 0
     for e in epitopes:
-        fasta_name = 'output/'+ids[ne]+'.fasta'
+        fasta_name = 'output/fasta_files/'+ids[ne]+'.fasta'
         name,sequence = readFasta(fasta_name)
-        peptides_dict = generateMERS('output/'+ids[ne]+'.fasta',len(e))
+        peptides_dict = generateMERS('output/fasta_files/'+ids[ne]+'.fasta',len(e))
         for key, v in peptides_dict.items():
             if v == e:
                 index = key
@@ -183,6 +183,8 @@ def generateCleavageSitesSequence(file):
     """
     if not os.path.exists('./output/'):
         os.mkdir('./output/')
+    if not os.path.exists('./output/fasta_files/'):
+        os.mkdir('./output/fasta_files/')
 
     df = pd.read_csv(file)
     cols = list(df.columns.values)
@@ -196,7 +198,7 @@ def generateCleavageSitesSequence(file):
     for i,ps in enumerate(seqs):
         identifier = ids[i]
         # Generate FASTA file
-        fasta_name = 'output/'+identifier+'.fasta'
+        fasta_name = 'output/fasta_files/'+identifier+'.fasta'
         if not os.path.exists(fasta_name):
             with open(fasta_name,'w') as outfile:
                 print('Generating FASTA file: {} ...'.format(fasta_name))
@@ -206,9 +208,9 @@ def generateCleavageSitesSequence(file):
     # Obtain cleavage sites
     ne = 0
     for e in epitopes:
-        fasta_name = 'output/'+ids[ne]+'.fasta'
+        fasta_name = 'output/fasta_files/'+ids[ne]+'.fasta'
         name,sequence = readFasta(fasta_name)
-        peptides_dict = generateMERS('output/'+ids[ne]+'.fasta',len(e))
+        peptides_dict = generateMERS('output/fasta_files/'+ids[ne]+'.fasta',len(e))
         for key, v in peptides_dict.items():
             if v == e:
                 index = key
