@@ -192,8 +192,6 @@ def generateCleavageSitesSequence(file):
     epitopes = df['epitope'].values
     cleavage_sites = []
     protein_sequences = []
-    accepted_epitopes = []
-    rejected_epitopes = []
 
     for i,ps in enumerate(seqs):
         identifier = ids[i]
@@ -218,17 +216,13 @@ def generateCleavageSitesSequence(file):
                 cleavage_site = e[-4:] + flanking_region
                 cleavage_sites.append(cleavage_site)
                 protein_sequences.append(sequence)
-                accepted_epitopes.append(e)
         ne+=1
-        if e not in accepted_epitopes:
-            rejected_epitopes.append(e)
-
+        if len(cleavage_sites)!= ne:
+            cleavage_sites.append('nan')
+            protein_sequences.append(sequence)
     # Append cleavage sites to df
-    try:
-        df['cleavage_site'] = cleavage_sites
-    except:
-        raise Exception('The following epitope/s are not found in the protein sequence: ',rejected_epitopes)
-
+    df['cleavage_site'] = cleavage_sites
+    df['protein_sequence'] = protein_sequences
     cols.append('cleavage_site')
     file = file.split('/')[-1].split('.')[0]
     outfile = 'output/' + file + '.csv'

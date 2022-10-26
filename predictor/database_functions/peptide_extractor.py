@@ -1,4 +1,5 @@
 import pandas as pd
+import warnings
 
 def extract_peptide_data(input_file_path, conditions_dictionary=None, iedb=True):
     """ Extracts peptides in IEDB under user defined conditions
@@ -25,6 +26,7 @@ def generate_df(input_file_path, conditions_dictionary=None, iedb=True):
         Returns the dataframe
     """
     if iedb:
+        warnings.filterwarnings('ignore', message="^Columns.*")
         df = pd.read_csv(input_file_path, header=1, usecols=list(conditions_dictionary.keys()))
         df.rename(columns={'Description':'peptide_sequence','Parent Protein IRI':'uniprot_id'},inplace=True)
         df["peptide_sequence"] = df["peptide_sequence"].str.split().str[0]
