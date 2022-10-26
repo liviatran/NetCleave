@@ -18,6 +18,7 @@ def score_set(data_path, model_path, name, uniprot=False):
     encoded_df = generate_encoded_df(encode_data, peptide_length, descriptors_df)
     prediction = model.predict(encoded_df)
     prediction_df = pd.DataFrame(prediction, columns=['prediction'])
+    pd.options.mode.chained_assignment = None  # Disable SettingWithCopyWarning
     df['prediction'] = prediction_df['prediction']
     df['prediction'][df.cleavage_site.isna()] = np.nan
     df['warning'] = ''

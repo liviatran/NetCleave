@@ -86,7 +86,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def generating_data(uniprot_path, uniparc_path_headers, uniparc_path_sequence, type, iedb_path=None, conditions=None, other_path=None):
+def generating_data(uniprot_path, uniparc_path_headers, uniparc_path_sequence, train_input, iedb_path=None, conditions=None, other_path=None):
     """
     Generate training data that will be later used to retrain the neural network.
     Returns a dictionary with the selected peptides (key: C-terminal residue, value: peptide list)
