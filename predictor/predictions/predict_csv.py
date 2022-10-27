@@ -21,8 +21,7 @@ def score_set(data_path, model_path, name, uniprot=False):
     pd.options.mode.chained_assignment = None  # Disable SettingWithCopyWarning
     df['prediction'] = prediction_df['prediction']
     df['prediction'][df.cleavage_site.isna()] = np.nan
-    df['warning'] = ''
-    df['warning'][df.cleavage_site.isna()] = 'problem_epitope_generation'
+    
     if uniprot==False:
         df = df.set_index('epitope_id')
 
