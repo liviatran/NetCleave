@@ -144,7 +144,7 @@ def main(generate=False, train=False, predict=False):
         print('Please, provide an argument. See python3 NetCleave.py -h for more information')
 
     if generate:
-        print('Generating training data, type {}...'.format(train_input))
+        print('---> Generating training data, type {}...'.format(train_input))
         uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta' # download and decompress from https://www.uniprot.org/downloads REVIEWED fasta
         uniparc_path_headers = 'data/databases/uniparc/uniparc-yourlist_M20200416A94466D2655679D1FD8953E075198DA854EB3ES.tab'
         uniparc_path_sequence = 'data/databases/uniparc/uniparc-yourlist_M20200416A94466D2655679D1FD8953E075198DA854EB3ES.fasta'
@@ -241,4 +241,4 @@ if __name__ == '__main__':
     main(generate, train, predict)
     time_final = time.time()
     time_dif = time_final - time_initial
-    print('Time execution:{}'.format(time_dif))
+    print('NetCleave\'s execution: {:.2f} s'.format(time_dif))

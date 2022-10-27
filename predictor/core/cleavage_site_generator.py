@@ -143,7 +143,7 @@ def generateCleavageSitesUniprot(file,uniprot_data):
         sequence = retrieveSequenceFromUniprot(identifier)
         if sequence != 0:
             with open(fasta_name,'w') as outfile:
-                print('Generating FASTA file: {} ...'.format(fasta_name))
+                print('---> Generating FASTA file: {} ...'.format(fasta_name))
                 outfile.write('>'+identifier+'\n')
                 outfile.write(sequence)
 
@@ -214,7 +214,7 @@ def generateCleavageSitesSequence(file):
         fasta_name = 'output/fasta_files/'+identifier+'.fasta'
         if not os.path.exists(fasta_name):
             with open(fasta_name,'w') as outfile:
-                print('Generating FASTA file: {} ...'.format(fasta_name))
+                print('---> Generating FASTA file: {} ...'.format(fasta_name))
                 outfile.write('>'+identifier+'\n')
                 outfile.write(ps)
 
@@ -222,7 +222,7 @@ def generateCleavageSitesSequence(file):
     ne = 0
     for e in epitopes:
         fasta_name = 'output/fasta_files/'+ids[ne]+'.fasta'
-        print('Reading fasta file: {}'.format(fasta_name))
+        print('---> Reading fasta file: {}'.format(fasta_name))
         name,sequence = readFasta(fasta_name)
         peptides_dict = generateMERS('output/fasta_files/'+ids[ne]+'.fasta',len(e))
         for key, v in peptides_dict.items():
