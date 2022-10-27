@@ -4,6 +4,7 @@ from predictor.database_functions import peptide_extractor, uniprot_extractor, u
 from predictor.core import all_peptide_uniprot_locator, all_training_data_generator, cleavage_site_generator
 from predictor.ml_main import run_NN
 from predictor.predictions import predict_csv
+import time
 
 HELP = ' \
 Command:\n \
@@ -211,7 +212,7 @@ def main(generate=False, train=False, predict=False):
 
 
 if __name__ == '__main__':
-
+    time_initial = time.time()
     # Get arguments
     arguments = parse_args()
     epitope_length = arguments.epitope_length
@@ -238,3 +239,6 @@ if __name__ == '__main__':
 
     # Call main function
     main(generate, train, predict)
+    time_final = time.time()
+    time_dif = time_final - time_initial
+    print('Time execution:{}'.format(time_dif))

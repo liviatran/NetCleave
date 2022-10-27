@@ -171,7 +171,6 @@ def generateCleavageSitesUniprot(file,uniprot_data):
             cleavage_sites.append('nan')
             protein_sequences.append(sequence)
             warnings.append('protein_not_found_in_uniprot')
-            print(warnings)
             ne+=1
     # Append cleavage sites to df
     df['cleavage_site'] = cleavage_sites
