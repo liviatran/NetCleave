@@ -153,9 +153,11 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     #     except:  # avoid TypeError when UniProt is blank
     #         pass
     # Obtain cleavage sites
+    counter = 0
     for i,e in enumerate(epitopes):
         try:
             fasta_id = ids[i]
+
             print(fasta_id)
             fasta_name = 'output/fasta_files/'+fasta_id+'.fasta'
             name,sequence = readFasta(fasta_name)
@@ -165,6 +167,7 @@ def generateCleavageSitesUniprot(file,uniprot_data):
                     if epitope[-1]==e:
                         warnings.pop()
                         warnings.append('epitope_repeated_in_protein_sequence')
+                        counter +=1
                         pass
                     else:
                         index = key
@@ -188,6 +191,7 @@ def generateCleavageSitesUniprot(file,uniprot_data):
             protein_sequences.append('nan')
             warnings.append('protein_not_found_in_uniprot')
     # Append cleavage sites to df
+    print('Counter:',counter)
     df = pd.DataFrame(columns=['epitope','cleavage_site', 'protein_sequence', 'warnings'])
     df['epitope'] = epitope
     df['uniprot_id'] = uniprot_ids
