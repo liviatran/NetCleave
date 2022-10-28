@@ -140,18 +140,18 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     warnings = []
     epitope = []
     uniprot_ids = []
-    # for identifier in df['uniprot_id'].unique():
-    #     # Generate FASTA file
-    #     try:
-    #         fasta_name = 'output/fasta_files/'+identifier+'.fasta'
-    #         sequence = retrieveSequenceFromUniprot(identifier)
-    #         if sequence != 0:
-    #             with open(fasta_name,'w') as outfile:
-    #                 print('---> Generating FASTA file: {} ...'.format(fasta_name))
-    #                 outfile.write('>'+identifier+'\n')
-    #                 outfile.write(sequence)
-    #     except:  # avoid TypeError when UniProt is blank
-    #         pass
+    for identifier in df['uniprot_id'].unique():
+        # Generate FASTA file
+        try:
+            fasta_name = 'output/fasta_files/'+identifier+'.fasta'
+            sequence = retrieveSequenceFromUniprot(identifier)
+            if sequence != 0:
+                with open(fasta_name,'w') as outfile:
+                    print('---> Generating FASTA file: {} ...'.format(fasta_name))
+                    outfile.write('>'+identifier+'\n')
+                    outfile.write(sequence)
+        except:  # avoid TypeError when UniProt is blank
+            pass
     # Obtain cleavage sites
     counter = 0
     for i,e in enumerate(epitopes):
@@ -161,7 +161,7 @@ def generateCleavageSitesUniprot(file,uniprot_data):
             print(fasta_id)
             fasta_name = 'output/fasta_files/'+fasta_id+'.fasta'
             name,sequence = readFasta(fasta_name)
-            peptides_dict = generateMERS('output/fasta_files/'+fasta_id+'.fasta',len(e))
+            # peptides_dict = generateMERS('output/fasta_files/'+fasta_id+'.fasta',len(e))
             for key, v in peptides_dict.items():
                 if v == e:
                     if epitope[-1]==e:
