@@ -6,15 +6,15 @@ def extract_peptide_data(input_file_path, conditions_dictionary=None, iedb=True)
         Returns a dictionary with keys: uniprot_id, values: peptide_list
     """
     if iedb:
-        print("Extracting peptide data from IEDB...")
+        print("---> Extracting peptide data from IEDB...")
         df = generate_df(input_file_path, conditions_dictionary, iedb=True)
-        print("Applying filtering conditions defined by the user...")
+        print("---> Applying filtering conditions defined by the user...")
         df_filtered = apply_conditions(df, conditions_dictionary)
     else:
-        print("Extracting peptide data from other databases ...")
+        print("---> Extracting peptide data from other databases ...")
         df_filtered = generate_df(input_file_path, iedb=False)
 
-    print("Creating the dictionary...")
+    print("---> Creating the dictionary...")
     data = create_dictionary(df_filtered)
     return data
 
@@ -76,6 +76,6 @@ def create_dictionary(df):
 
 def merge_peptide_data(dict1,dict2):
 
-    print('Merging peptide data from IEDB and other databases...')
+    print('---> Merging peptide data from IEDB and other databases...')
     d = dict(dict1, **dict2)
     return d
