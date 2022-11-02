@@ -146,18 +146,18 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     epitope = []
     uniprot_ids = []
 
-    # for identifier in df['uniprot_id'].unique():
-    #     # Generate FASTA file
-    #     try:
-    #         fasta_name = 'output/fasta_files/'+identifier+'.fasta'
-    #         sequence = retrieveSequenceFromUniprot(identifier)
-    #         if sequence != 0:
-    #             with open(fasta_name,'w') as outfile:
-    #                 print('---> Generating FASTA file: {} ...'.format(fasta_name))
-    #                 outfile.write('>'+identifier+'\n')
-    #                 outfile.write(sequence)
-    #     except:  # avoid TypeError when UniProt is blank
-    #         pass
+    for identifier in df['uniprot_id'].unique():
+        # Generate FASTA file
+        try:
+            fasta_name = 'output/fasta_files/'+identifier+'.fasta'
+            sequence = retrieveSequenceFromUniprot(identifier)
+            if sequence != 0:
+                with open(fasta_name,'w') as outfile:
+                    print('---> Generating FASTA file: {} ...'.format(fasta_name))
+                    outfile.write('>'+identifier+'\n')
+                    outfile.write(sequence)
+        except:  # avoid TypeError when UniProt is blank
+            pass
 
     ## Obtain cleavage sites
     for i,e in enumerate(epitopes):
