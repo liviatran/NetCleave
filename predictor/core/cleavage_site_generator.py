@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import pandas as pd
 from Bio import SeqIO
 import requests as r
@@ -101,6 +102,12 @@ def generateCleavageSites(file,mhc=None,custom_length=None):
     return outfile
 
 
+def cleavageMotif(sequence, peptide, start):
+    length = len(peptide) -4
+    start+=length
+    return sequence[start:start+7]
+
+
 def retrieveSequenceFromUniprot(protein_code):
 
     try:
@@ -131,59 +138,56 @@ def generateCleavageSitesUniprot(file,uniprot_data):
 
     df = pd.read_csv(file)
     cols = list(df.columns.values)
-
     ids = df['uniprot_id'].values
-    print(ids)
     epitopes = df['epitope'].values
     cleavage_sites = []
     protein_sequences = []
     warnings = []
     epitope = []
     uniprot_ids = []
-    for identifier in df['uniprot_id'].unique():
-        # Generate FASTA file
-        try:
-            fasta_name = 'output/fasta_files/'+identifier+'.fasta'
-            sequence = retrieveSequenceFromUniprot(identifier)
-            if sequence != 0:
-                with open(fasta_name,'w') as outfile:
-                    print('---> Generating FASTA file: {} ...'.format(fasta_name))
-                    outfile.write('>'+identifier+'\n')
-                    outfile.write(sequence)
-        except:  # avoid TypeError when UniProt is blank
-            pass
-    # Obtain cleavage sites
-    counter = 0
+
+    # for identifier in df['uniprot_id'].unique():
+    #     # Generate FASTA file
+    #     try:
+    #         fasta_name = 'output/fasta_files/'+identifier+'.fasta'
+    #         sequence = retrieveSequenceFromUniprot(identifier)
+    #         if sequence != 0:
+    #             with open(fasta_name,'w') as outfile:
+    #                 print('---> Generating FASTA file: {} ...'.format(fasta_name))
+    #                 outfile.write('>'+identifier+'\n')
+    #                 outfile.write(sequence)
+    #     except:  # avoid TypeError when UniProt is blank
+    #         pass
+
+    ## Obtain cleavage sites
     for i,e in enumerate(epitopes):
         try:
             fasta_id = ids[i]
-
-            print(fasta_id)
             fasta_name = 'output/fasta_files/'+fasta_id+'.fasta'
             name,sequence = readFasta(fasta_name)
-            # peptides_dict = generateMERS('output/fasta_files/'+fasta_id+'.fasta',len(e))
-            for key, v in peptides_dict.items():
-                if v == e:
-                    if epitope[-1]==e:
-                        warnings.pop()
-                        warnings.append('epitope_repeated_in_protein_sequence')
-                        counter +=1
-                        pass
-                    else:
-                        index = key
-                        flanking_region = sequence[key+len(e):key+len(e)+3]
-                        cleavage_site = e[-4:] + flanking_region
-                        epitope.append(e)
-                        uniprot_ids.append(fasta_id)
-                        cleavage_sites.append(cleavage_site)
-                        protein_sequences.append(sequence)
-                        warnings.append('-')
-            if len(cleavage_sites)!= i+1:
+            epitope_match = re.finditer(str(e), str(sequence)) # find peptide in sequence
+            indices = [m.start(0) for m in epitope_match] # get start index
+            if len(indices)==0:
                 epitope.append(e)
                 uniprot_ids.append(fasta_id)
                 cleavage_sites.append('nan')
                 protein_sequences.append(sequence)
                 warnings.append('epitope_not_found_in_protein_sequence')
+            else:
+                for ind in indices:
+                    cleavage_site=cleavageMotif(sequence,e,ind)
+                    if len(cleavage_site)==7:
+                        epitope.append(e)
+                        uniprot_ids.append(fasta_id)
+                        cleavage_sites.append(cleavage_site)
+                        protein_sequences.append(sequence)
+                        warnings.append('-')
+                    else:
+                        epitope.append(e)
+                        uniprot_ids.append(fasta_id)
+                        cleavage_sites.append('nan')
+                        protein_sequences.append(sequence)
+                        warnings.append('cannot_generate_cleavage_motif')
         except:
             epitope.append(e)
             uniprot_ids.append(fasta_id)
@@ -191,19 +195,18 @@ def generateCleavageSitesUniprot(file,uniprot_data):
             protein_sequences.append('nan')
             warnings.append('protein_not_found_in_uniprot')
     # Append cleavage sites to df
-    print('Counter:',counter)
     df = pd.DataFrame(columns=['epitope','cleavage_site', 'protein_sequence', 'warnings'])
     df['epitope'] = epitope
     df['uniprot_id'] = uniprot_ids
     df['cleavage_site'] = cleavage_sites
     df['protein_sequence'] = protein_sequences
     df['warnings'] = warnings
-    # cols.append('cleavage_site')
-    # cols.append('warnings')
+    cols.append('cleavage_site')
+    cols.append('warnings')
     file = file.split('/')[-1].split('.')[0]
     outfile = 'output/' + file + '.csv'
-
-    df.to_csv(outfile, header=True, columns=['epitope','uniprot_id','cleavage_site', 'protein_sequence', 'warnings'], index=False)
+    df.to_csv(outfile, header=True, columns=['epitope','uniprot_id','cleavage_site','protein_sequence','warnings'], index=False)
+    # df.to_csv(outfile, header=True, columns=cols, index=False)
 
     return outfile
 
