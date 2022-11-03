@@ -146,7 +146,6 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     epitope = []
     uniprot_ids = []
 
-
     uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta' # download and decompress from https://www.uniprot.org/downloads REVIEWED fasta
     changes_in_db = 0
     for identifier in df['uniprot_id'].unique():
@@ -217,7 +216,6 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     file = file.split('/')[-1].split('.')[0]
     outfile = 'output/' + file + '.csv'
     df.to_csv(outfile, header=True, columns=['epitope','uniprot_id','cleavage_site','protein_sequence','warnings'], index=False)
-    # df.to_csv(outfile, header=True, columns=cols, index=False)
 
     return outfile
 
