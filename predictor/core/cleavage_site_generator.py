@@ -134,8 +134,6 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     """
     if not os.path.exists('./output/'):
         os.mkdir('./output/')
-    if not os.path.exists('./output/fasta_files/'):
-        os.mkdir('./output/fasta_files/')
 
     df = pd.read_csv(file)
     cols = list(df.columns.values)
@@ -234,8 +232,6 @@ def generateCleavageSitesSequence(file):
     """
     if not os.path.exists('./output/'):
         os.mkdir('./output/')
-    if not os.path.exists('./output/fasta_files/'):
-        os.mkdir('./output/fasta_files/')
 
     df = pd.read_csv(file)
     cols = list(df.columns.values)
