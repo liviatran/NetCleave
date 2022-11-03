@@ -5,6 +5,7 @@ import pandas as pd
 from Bio import SeqIO
 import requests as r
 from io import StringIO
+from predictor.database_functions import uniprot_extractor
 
 def readFasta(file):
     """
@@ -128,7 +129,7 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     PARAMETERS
     ------------------------------------------------------------
     · file: path to the csv file
-    · uniprot_data: Uniprot identifiers and the corresponding sequences,  obtained from local database
+    · uniprot_data: Uniprot identifiers and the corresponding sequences, obtained from local database
     ------------------------------------------------------------
     """
     if not os.path.exists('./output/'):
@@ -140,31 +141,43 @@ def generateCleavageSitesUniprot(file,uniprot_data):
     cols = list(df.columns.values)
     ids = df['uniprot_id'].values
     epitopes = df['epitope'].values
+
     cleavage_sites = []
     protein_sequences = []
     warnings = []
     epitope = []
     uniprot_ids = []
 
+
+    uniprot_path = 'data/databases/uniprot/uniprot_sprot.fasta' # download and decompress from https://www.uniprot.org/downloads REVIEWED fasta
+    changes_in_db = 0
     for identifier in df['uniprot_id'].unique():
-        # Generate FASTA file
         try:
-            fasta_name = 'output/fasta_files/'+identifier+'.fasta'
-            sequence = retrieveSequenceFromUniprot(identifier)
-            if sequence != 0:
-                with open(fasta_name,'w') as outfile:
-                    print('---> Generating FASTA file: {} ...'.format(fasta_name))
-                    outfile.write('>'+identifier+'\n')
-                    outfile.write(sequence)
-        except:  # avoid TypeError when UniProt is blank
-            pass
+            uniprot_data[identifier]
+        except:
+            # Append sequence information for identifier not available in local database
+            try:
+                sequence = retrieveSequenceFromUniprot(identifier)
+                if sequence != 0:
+                    with open(uniprot_path,'a') as outfile:
+                        print('---> Adding {} to local UniProt database...'.format(identifier))
+                        outfile.write('>sp|'+identifier+'|added_by_NetCleave\n')
+                        outfile.write(sequence+'\n')
+                        changes_in_db+=1
+
+            except:
+                # avoid TypeError when UniProt is blank
+                pass
+
+    ## Update UniProt data in case new sequences are added to local database
+    if changes_in_db>0:
+        uniprot_data = uniprot_extractor.extract_uniprot_data(uniprot_path)
 
     ## Obtain cleavage sites
     for i,e in enumerate(epitopes):
         try:
             fasta_id = ids[i]
-            fasta_name = 'output/fasta_files/'+fasta_id+'.fasta'
-            name,sequence = readFasta(fasta_name)
+            sequence = uniprot_data[fasta_id]
             epitope_match = re.finditer(str(e), str(sequence)) # find peptide in sequence
             indices = [m.start(0) for m in epitope_match] # get start index
             if len(indices)==0:
@@ -194,7 +207,7 @@ def generateCleavageSitesUniprot(file,uniprot_data):
             cleavage_sites.append('nan')
             protein_sequences.append('nan')
             warnings.append('protein_not_found_in_uniprot')
-    # Append cleavage sites to df
+    ## Append cleavage sites to df
     df = pd.DataFrame(columns=['epitope','cleavage_site', 'protein_sequence', 'warnings'])
     df['epitope'] = epitope
     df['uniprot_id'] = uniprot_ids
