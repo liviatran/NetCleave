@@ -41,7 +41,7 @@ def parse_args():
                             dest = 'mhc_allele',
                             help='Major Histocompatibility Complex allele.',
                             action='store',
-                            default='HLA')
+                            default='HLA-A')
     parser.add_argument('--mhc_class',
                             dest = 'mhc_class',
                             help='Major Histocompatibility Complex class. It can be either class I or II.',
@@ -158,7 +158,12 @@ def main(generate=False, train=False, predict=False):
                                  #'Name': ('contains', 'Homo sapiens'),
                                  #'Parent Species': ('contains', 'Homo sapiens')
                                  }
-            selected_dictionary = generating_data(uniprot_path,uniparc_path_headers,uniparc_path_sequence,train_input=1,iedb_path=peptide_path,conditions=iedb_conditions)
+            selected_dictionary = generating_data(uniprot_path,
+                                                    uniparc_path_headers,
+                                                    uniparc_path_sequence,
+                                                    train_input=1,
+                                                    iedb_path=peptide_path,
+                                                    conditions=iedb_conditions)
         elif train_input==2:
             peptide_path = peptide_data
             peptide_path2 = peptide_data_additional
@@ -188,7 +193,9 @@ def main(generate=False, train=False, predict=False):
         all_training_data_generator.prepare_cleavage_data(selected_dictionary, training_data_path)
 
     if train:
+        print('---> Training NetCleave with: {}'.format(training_data_path))
         run_NN.create_models(training_data_path, models_export_path)
+        print('---> Custom NetCleave model available at: {}'.format(models_export_path))
 
     if predict!='None':
         if pred_input==1: # predict fasta file

@@ -31,7 +31,7 @@ def score_set(data_path, model_path, name, uniprot=False):
     outfile = data_path.split('.')[0] + '_NetCleave.csv'
     df.to_csv(outfile, header=True)
     os.remove(data_path)
-    print('Exporting predictions to: {}'.format(outfile))
+    print('---> Exporting predictions to: {}'.format(outfile))
 
     return df
 

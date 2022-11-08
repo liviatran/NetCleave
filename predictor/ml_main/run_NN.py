@@ -63,7 +63,7 @@ def prepare(data_train, data_val, data_test, class_labels_train, class_labels_va
 
     data_train = np.reshape(data_train, (data_train.shape[1], data_train.shape[2]))
     data_val = np.reshape(data_val, (data_val.shape[1], data_val.shape[2]))
-    data_test = np.reshape(data_test, (data_test.shape[1], data_test.shape[2]))    
+    data_test = np.reshape(data_test, (data_test.shape[1], data_test.shape[2]))
 
     class_labels_train = class_labels_train.to_numpy().reshape((-1, ))
     class_labels_val = class_labels_val.to_numpy().reshape((-1, ))
@@ -140,7 +140,6 @@ def run_NN(encoded_labeled_df, models_export_path, path):
     plt.savefig("model_{}.png".format(path), dpi=300)
 
 def create_models(training_data_path, model_path):
-    print(training_data_path)
     peptide_lenght = 7
     sequence_table, class_table = read_data_table(training_data_path)
 

@@ -1,5 +1,5 @@
 def join_data(uniprot_data, uniparc_data):
-    print("Merging Uniprot and Uniparc data..")
+    print("---> Merging Uniprot and Uniparc data..")
     for uniprot_id, sequence in uniparc_data.items():
         if not uniprot_id in uniprot_data:
             uniprot_data.setdefault(uniprot_id, sequence)
@@ -13,7 +13,7 @@ def locate_peptides(ms_data, uniprot_data):
         key = C-terminal residue of the peptide (IEDB)
         values = a list of peptides
     """
-    print("Locating IEDB peptides into Uniprot sequences...")
+    print("---> Locating IEDB peptides into Uniprot sequences...")
     adjacent_lenght = 4
     data_dict = {}
     found_peptides = not_found_peptides = mutated_peptides = len_set = 0
@@ -38,7 +38,7 @@ def locate_peptides(ms_data, uniprot_data):
                     mutated_peptides += 1
         else:
             not_found_peptides += len(peptide_set)
-    
+
     print("{} unique peptides".format(len_set))
     print("{}/{} peptides have been found/not found in Uniprot/Uniparc".format(found_peptides, not_found_peptides))
     print("{} mutation peptides".format(mutated_peptides))
@@ -59,4 +59,3 @@ def get_neighbour_sequence(uniprot_data, uniprot_id, peptide, adjacent_lenght, r
             return None, None, None
     else:
         return None, None, None
-

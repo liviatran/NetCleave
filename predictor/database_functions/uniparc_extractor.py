@@ -1,7 +1,7 @@
 import pandas as pd
 
 def extract_uniparc_data(uniparc_path_headers, uniparc_path_sequence):
-    print("Extracting protein sequence data from Uniparc...")
+    print("---> Extracting protein sequence data from Uniparc...")
     header_dict = get_headers_uniprot_uniparc(uniparc_path_headers)
     data = {}
     with open(uniparc_path_sequence, "r") as f:
