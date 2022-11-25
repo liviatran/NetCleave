@@ -9,7 +9,7 @@ from keras import backend as K
 from tensorflow.keras.optimizers import SGD
 
 def score_set(data_path, model_path, name, uniprot=False):
-
+    print('Predict using model: {}'.format(model_path))
     peptide_length = 7
     model = load_model(model_path)
     df = read_data_table(data_path)

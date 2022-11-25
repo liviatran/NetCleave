@@ -50,6 +50,10 @@ def parse_args():
                             dest = 'mhc_options',
                             help='Prints characteristics of the available pre-trained models located at /data/models. It describes the mhc_allele, mhc_class and technique.',
                             action='store_true')
+    parser.add_argument('--model_path',
+                            dest = 'model_path',
+                            help='Path to the NetCleave retrained model.',
+                            action='store',default='None')
     parser.add_argument('--peptide_data',
                             dest = 'peptide_data',
                             help='Path to peptide data to use for generating data to later train the model.',
@@ -138,7 +142,10 @@ def main(generate=False, train=False, predict=False):
         training_data_path = data_path
     else:
         training_data_path = 'data/training_data/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_allele)
-    models_export_path = 'data/models/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_allele)
+    if model_path!= 'None':
+        models_export_path = model_path
+    else:
+        models_export_path = 'data/models/{}_{}_{}'.format(mhc_class, technique.replace(' ', '-'), mhc_allele)
 
     if not any([generate, train, predict]):
         print('Please, provide an argument. See python3 NetCleave.py -h for more information')
@@ -191,7 +198,7 @@ def main(generate=False, train=False, predict=False):
                                                       other_path=peptide_path)
 
         all_training_data_generator.prepare_cleavage_data(selected_dictionary, training_data_path)
-
+        print('---> Training data available at: {}'.format(training_data_path))
     if train:
         print('---> Training NetCleave with: {}'.format(training_data_path))
         run_NN.create_models(training_data_path, models_export_path)
@@ -228,6 +235,7 @@ if __name__ == '__main__':
     mhc_allele = arguments.mhc_allele
     mhc_class = arguments.mhc_class
     mhc_options = arguments.mhc_options
+    model_path = arguments.model_path
     peptide_data = arguments.peptide_data
     peptide_data_additional = arguments.peptide_data_additional
     predict = arguments.predict
