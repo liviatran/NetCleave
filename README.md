@@ -69,7 +69,7 @@ python3 NetCleave.py --predict (fasta) --pred_input 1 --model_path (model path)
 
 ```
 # Generate training data
-python3 NetCleave.py --generate --train_input 2 --peptide_data (IEDB data path) --peptide_data_additional ./(other data path)  --data_path (output training data path)
+python3 NetCleave.py --generate --train_input 2 --peptide_data (IEDB data path) --peptide_data_additional (other data path)  --data_path (output training data path)
 
 # Train NetCleave with data generated previously
 python3 NetCleave.py --train --data_path (training data path) --model_path (output model path)
