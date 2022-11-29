@@ -41,7 +41,7 @@ def parse_args():
                             dest = 'mhc_allele',
                             help='Major Histocompatibility Complex allele.',
                             action='store',
-                            default='HLA-A')
+                            default='HLA')
     parser.add_argument('--mhc_class',
                             dest = 'mhc_class',
                             help='Major Histocompatibility Complex class. It can be either class I or II.',
@@ -158,10 +158,10 @@ def main(generate=False, train=False, predict=False):
         if train_input==1:
             peptide_path = peptide_data
             iedb_conditions = {
-                                'Description': None, 'Parent Protein IRI': None,
-                                'Method/Technique': ('contains', technique),
-                                'MHC allele class': ('match', mhc_class),
-                                'Allele Name': ('contains', mhc_allele),
+                                'Description': None, 'Parent.Protein.IRI': None,
+                                'Method.Technique': ('contains', technique),
+                                'MHC.allele.class': ('match', mhc_class),
+                                'Allele.Name': ('contains', mhc_allele),
                                  #'Name': ('contains', 'Homo sapiens'),
                                  #'Parent Species': ('contains', 'Homo sapiens')
                                  }
@@ -175,10 +175,10 @@ def main(generate=False, train=False, predict=False):
             peptide_path = peptide_data
             peptide_path2 = peptide_data_additional
             iedb_conditions = {
-                                'Description': None, 'Parent Protein IRI': None,
-                                'Method/Technique': ('contains', technique),
-                                'MHC allele class': ('match', mhc_class),
-                                'Allele Name': ('contains', mhc_allele),
+                                'Description': None, 'Parent.Protein.IRI': None,
+                                'Method.Technique': ('contains', technique),
+                                'MHC.allele.class': ('match', mhc_class),
+                                'Allele.Name': ('contains', mhc_allele),
                                  #'Name': ('contains', 'Homo sapiens'),
                                  #'Parent Species': ('contains', 'Homo sapiens')
                                  }
