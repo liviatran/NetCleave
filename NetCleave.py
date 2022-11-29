@@ -256,4 +256,4 @@ if __name__ == '__main__':
     main(generate, train, predict)
     time_final = time.time()
     time_dif = time_final - time_initial
-    print('NetCleave\'s execution: {:.2f} s'.format(time_dif))
+    print('---> NetCleave\'s execution: {:.2f} s'.format(time_dif))

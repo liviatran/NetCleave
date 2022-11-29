@@ -39,9 +39,9 @@ def locate_peptides(ms_data, uniprot_data):
         else:
             not_found_peptides += len(peptide_set)
 
-    print("{} unique peptides".format(len_set))
-    print("{}/{} peptides have been found/not found in Uniprot/Uniparc".format(found_peptides, not_found_peptides))
-    print("{} mutation peptides".format(mutated_peptides))
+    print("---> {} unique peptides".format(len_set))
+    print("---> {}/{} peptides have been found/not found in Uniprot/Uniparc".format(found_peptides, not_found_peptides))
+    print("---> {} mutation peptides".format(mutated_peptides))
     return data_dict
 
 def get_neighbour_sequence(uniprot_data, uniprot_id, peptide, adjacent_lenght, residues_set):
