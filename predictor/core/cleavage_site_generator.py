@@ -47,7 +47,7 @@ def generateMERS(file,length):
     return peptides_mers
 
 
-def generateCleavageSites(file,mhc=None,custom_length=None):
+def generateCleavageSites(file,dir,mhc=None,custom_length=None,):
     """
     Create a csv file with the cleavage sites of a set of peptides (generated using
     the Fasta file of a protein of interest). The cleavage sites contain the necessary
@@ -93,11 +93,11 @@ def generateCleavageSites(file,mhc=None,custom_length=None):
 
     df = pd.DataFrame(list(zip(epitopes_id,epitopes_seq,epitopes_len,cleavage_sites)),columns=['epitope_id','epitope','epitope_length','cleavage_site'])
 
-    if not os.path.exists('./output/'):
-        os.mkdir('./output/')
+    #if not os.path.exists('./output/'):
+    #    os.mkdir('./output/')
 
     fasta_name = file.split('/')[-1].split('.')[0]
-    outfile = 'output/' + fasta_name + '.csv'
+    outfile = dir + fasta_name + '.csv'
     df.to_csv(outfile, header=True, columns=['epitope_id','epitope','epitope_length','cleavage_site'], index=False)
 
     return outfile

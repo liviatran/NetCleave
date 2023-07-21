@@ -1,5 +1,6 @@
 import argparse
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from predictor.database_functions import peptide_extractor, uniprot_extractor, uniparc_extractor
 from predictor.core import all_peptide_uniprot_locator, all_training_data_generator, cleavage_site_generator
 from predictor.ml_main import run_NN
@@ -87,6 +88,8 @@ def parse_args():
                             (2) combining the IEDB with additional data from other sources and (3) using other data sources without taking into account the IEDB.
                             """,
                             action='store',default=1,type=int)
+    parser.add_argument('--td',
+                            dest = 'temp_directory')
 
     return parser.parse_args()
 
@@ -210,7 +213,8 @@ def main(generate=False, train=False, predict=False):
                 outfile = cleavage_site_generator.generateCleavageSites(predict,custom_length=epitope_length)
                 predict_csv.score_set(outfile, models_export_path, 'ABC')
             else:
-                outfile = cleavage_site_generator.generateCleavageSites(predict,mhc=mhc_class)
+                outfile = cleavage_site_generator.generateCleavageSites(predict,mhc=mhc_class,dir=temp_directory)
+                print(outfile)
                 predict_csv.score_set(outfile, models_export_path, 'ABC')
 
         if pred_input==2: # predict csv file with uniprot id
@@ -243,6 +247,7 @@ if __name__ == '__main__':
     train = arguments.train
     data_path = arguments.data_path
     train_input = arguments.train_input
+    temp_directory = arguments.temp_directory
 
     if mhc_options:
         files = sorted(os.listdir('./data/models'))
