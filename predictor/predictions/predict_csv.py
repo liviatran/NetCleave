@@ -13,6 +13,10 @@ def score_set(data_path, model_path, name, uniprot=False):
     peptide_length = 7
     model = load_model(model_path)
     df = read_data_table(data_path)
+    if len(df) == 0:
+        outfile = data_path.split('.')[0] + '_NetCleave.csv'
+        df.to_csv(outfile, header=True)
+        return df
     descriptors_df = read_descriptors_table()
     encode_data = encode_sequence_data(df, descriptors_df)
     encoded_df = generate_encoded_df(encode_data, peptide_length, descriptors_df)
@@ -25,12 +29,8 @@ def score_set(data_path, model_path, name, uniprot=False):
     if uniprot==False:
         df = df.set_index('epitope_id')
 
-    if not os.path.exists('./output/'):
-        os.mkdir('./output/')
-
     outfile = data_path.split('.')[0] + '_NetCleave.csv'
     df.to_csv(outfile, header=True)
-    os.remove(data_path)
     print('---> Exporting predictions to: {}'.format(outfile))
 
     return df
